@@ -172,8 +172,7 @@ def cleanDuplicates():
 # This function cleans the item data
 
 def h_parser(line):
-    h = HTMLParser.HTMLParser()
-    parsed_line = h.unescape(line)
+    parsed_line = html.unescape(line)
     parsed_line = parsed_line.replace('<text xml:space="preserve">', '').replace('</text>', '').replace('\n',
                                                                                                         '').lstrip(' ')
     parsed_line = unicodedata.normalize('NFKD', parsed_line).encode('utf-8', 'ignore')
