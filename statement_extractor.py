@@ -488,13 +488,11 @@ def file_extractor(file_name):
 
             if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
-                print(revDict)
                 revMetadata.append(revDict)
                 try:
                     parsed_json = ujson.loads(parsed_line)
                     rev_process = extr_rev_data(parsed_json, revDict['revId'])
                     revision_processed.append(rev_process)
-                    print('done')
                 except ValueError as e:
                     # print(e)
                     # print(parsed_line)
@@ -508,7 +506,7 @@ def file_extractor(file_name):
 
             # counter += 1
 
-            if counter >= 10000:
+            if counter >= 1000:
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
