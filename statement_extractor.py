@@ -640,12 +640,14 @@ def file_extractor(file_name):
                 # break
 
             counterImport += 1
-            continue
 
             if counterImport == 3:
                 cleanDuplicates()
                 print('Duplicated cleaned')
                 counterImport = 0
+            continue
+
+
 
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
