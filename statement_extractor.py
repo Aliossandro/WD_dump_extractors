@@ -642,9 +642,10 @@ def file_extractor(file_name):
             counterImport += 1
             continue
 
-        if counterImport == 30:
+        if counterImport == 3:
             cleanDuplicates()
             print('Duplicated cleaned')
+            counterImport = 0
 
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
