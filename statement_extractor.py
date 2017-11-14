@@ -457,17 +457,14 @@ def file_extractor(file_name):
                 parId = None
 
             if '<timestamp>' in line:
-                try:
-                    timeStamp = timeStamp.replace('\t', '')
-                    timeStamp = timeStamp.replace('\n', '')
-                    timeStamp = timeStamp.replace('T', ' ')
-                    timeStamp = timeStamp.replace('Z', '')
-                    timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
-                    timeStamp = timeStamp.lstrip(' ')
-                    revDict['timeStamp'] = timeStamp
-                    timeStamp = None
-                except AttributeError:
-                    print(line)
+                timeStamp = line.replace('\t', '')
+                timeStamp = timeStamp.replace('\n', '')
+                timeStamp = timeStamp.replace('T', ' ')
+                timeStamp = timeStamp.replace('Z', '')
+                timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
+                timeStamp = timeStamp.lstrip(' ')
+                revDict['timeStamp'] = timeStamp
+                timeStamp = None
 
             if '<username>' in line:
                 userName = line
@@ -483,8 +480,6 @@ def file_extractor(file_name):
                 userName = None
 
             revMetadata.append(revDict)
-            revDict = {}
-
 
             if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
@@ -495,7 +490,10 @@ def file_extractor(file_name):
                 except ValueError as e:
                     # print(e)
                     # print(parsed_line)
+                    revDict = {}
                     pass
+
+            revDict = {}
 
             # counter += 1
 
