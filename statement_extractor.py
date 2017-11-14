@@ -489,6 +489,8 @@ def file_extractor(file_name):
 
             if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
+                if 'parId' not in revDict.keys():
+                    revDict['parId'] = 'None'
                 revMetadata.append(revDict)
                 try:
                     parsed_json = ujson.loads(parsed_line)
