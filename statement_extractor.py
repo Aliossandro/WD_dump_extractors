@@ -119,40 +119,33 @@ def create_table():
 
 def cleanDuplicates():
 
-    statementQuery = """DELETE FROM statementsData_201710
-    WHERE revId IN (SELECT revId FROM (SELECT revId,
-    ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num
-    FROM statementsData_201710 ) t
-    WHERE t.row_num > 1 )
+    statementQuery = """
+    DELETE FROM statementsData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num FROM statementsData_201710 ) t WHERE t.row_num > 1 )
     """
 
-    referenceQuery = """DELETE FROM referenceData_201710 
-    WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY  revId ) AS row_num
-    FROM referenceData_201710 ) t
-    WHERE t.row_num > 1 )
+    referenceQuery = """DELETE FROM referenceData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_201710 ) t WHERE t.row_num > 1 )
     """
 
-    qualifierQuery = """DELETE FROM qualifierData_201710 
-    WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num 
-    FROM qualifierData_201710 ) t
-    WHERE t.row_num > 1 )
+    qualifierQuery = """DELETE FROM qualifierData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_201710 ) t WHERE t.row_num > 1 )
     """
     query_list = [statementQuery, referenceQuery, qualifierQuery]
     conn = None
 
-    try:
-        conn = get_db_params()
-        cur = conn.cursor()
-        for query in query_list:
-            cur.execute(query)
-        cur.close()
-        conn.commit()
 
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+    conn = get_db_params()
+    cur = conn.cursor()
+
+    for query in query_list:
+        try:
+            cur.execute(query)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+
+    cur.close()
+    conn.commit()
+
+    if conn is not None:
+        conn.close()
 
 
 
