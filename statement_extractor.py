@@ -120,7 +120,7 @@ def create_table():
 def cleanDuplicates():
 
     statementQuery = '''DELETE FROM statementsData_201710
-        WHERE serialid IN
+        WHERE revId IN
             (SELECT revId
             FROM 
                 (SELECT revId,
@@ -131,7 +131,7 @@ def cleanDuplicates():
         '''
 
     referenceQuery = '''DELETE FROM referenceData_201710
-            WHERE serialid IN
+            WHERE revId IN
                 (SELECT revId
                 FROM 
                     (SELECT revId,
@@ -142,7 +142,7 @@ def cleanDuplicates():
             '''
 
     qualifierQuery = '''DELETE FROM qualifierData_201710
-    WHERE serialid IN
+    WHERE revId IN
         (SELECT revId
         FROM 
             (SELECT revId,
@@ -514,6 +514,7 @@ def file_extractor(file_name):
                 counterImport = 0
 
             if counter >= 100000:
+                counterImport += 1
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
@@ -643,8 +644,7 @@ def file_extractor(file_name):
                 counter = 0
                 # break
 
-            counterImport += 1
-            continue
+            # continue
 
 
 
