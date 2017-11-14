@@ -509,7 +509,7 @@ def file_extractor(file_name):
 
             # counter += 1
 
-            if counter >= 1000:
+            if counter >= 100000:
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
