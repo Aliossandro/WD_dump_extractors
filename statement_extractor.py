@@ -541,7 +541,7 @@ def file_extractor(file_name):
                                 conn.rollback()
                                 e = sys.exc_info()[0]
                                 print("<p>Error: %s</p>" % e)
-                                print('not imported')
+                                print('not imported, revision id error')
                                 print(stat)
 
                     try:
