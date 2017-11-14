@@ -508,6 +508,10 @@ def file_extractor(file_name):
 
 
             # counter += 1
+            if counterImport == 3:
+                cleanDuplicates()
+                print('Duplicated cleaned')
+                counterImport = 0
 
             if counter >= 100000:
 
@@ -640,11 +644,6 @@ def file_extractor(file_name):
                 # break
 
             counterImport += 1
-
-            if counterImport == 3:
-                cleanDuplicates()
-                print('Duplicated cleaned')
-                counterImport = 0
             continue
 
 
