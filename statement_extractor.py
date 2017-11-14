@@ -123,10 +123,12 @@ def cleanDuplicates():
     DELETE FROM statementsData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num FROM statementsData_201710 ) t WHERE t.row_num > 1 )
     """
 
-    referenceQuery = """DELETE FROM referenceData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_201710 ) t WHERE t.row_num > 1 )
+    referenceQuery = """
+    DELETE FROM referenceData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_201710 ) t WHERE t.row_num > 1 )
     """
 
-    qualifierQuery = """DELETE FROM qualifierData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_201710 ) t WHERE t.row_num > 1 )
+    qualifierQuery = """
+    DELETE FROM qualifierData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_201710 ) t WHERE t.row_num > 1 )
     """
     query_list = [statementQuery, referenceQuery, qualifierQuery]
     conn = None
