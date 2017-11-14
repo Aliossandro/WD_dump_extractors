@@ -492,6 +492,8 @@ def file_extractor(file_name):
                     # print(parsed_line)
                     revDict = {}
                     pass
+                except KeyError:
+                    print(revDict)
 
             revDict = {}
 
