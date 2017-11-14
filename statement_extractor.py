@@ -444,6 +444,7 @@ def file_extractor(file_name):
                 revId = revId.lstrip()
                 revId = revId.replace('<id>', '')
                 revId = revId.replace('</id>', '')
+                revId = revId.rstrip()
                 revDict['revId'] = revId
                 print(revDict)
                 revId = None
@@ -455,6 +456,7 @@ def file_extractor(file_name):
                 parId = parId.replace('<id>', '')
                 parId = parId.replace('</id>', '')
                 revDict['parId'] = parId
+                print(revDict)
                 parId = None
 
             if '<timestamp>' in line:
@@ -465,6 +467,7 @@ def file_extractor(file_name):
                 timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
                 timeStamp = timeStamp.lstrip(' ')
                 revDict['timeStamp'] = timeStamp
+                print(revDict)
                 timeStamp = None
 
             if '<username>' in line:
@@ -472,12 +475,14 @@ def file_extractor(file_name):
                 userName = userName.lstrip()
                 userName = re.sub(r'<username>|</username>', '', userName)
                 revDict['userName'] = userName
+                print(revDict)
                 userName = None
             elif '<ip>' in line:
                 userName = line
                 userName = userName.lstrip()
                 userName = re.sub(r'<ip>|</ip>', '', userName)
                 revDict['userName'] = userName
+                print(revDict)
                 userName = None
 
             revMetadata.append(revDict)
