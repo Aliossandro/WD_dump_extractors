@@ -15,7 +15,7 @@ import psycopg2
 import bz2
 # import datetime
 import itertools
-import HTMLParser
+import html
 # from sqlalchemy import create_engine
 # import subprocess
 import unicodedata
