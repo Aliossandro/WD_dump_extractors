@@ -457,14 +457,17 @@ def file_extractor(file_name):
                 parId = None
 
             if '<timestamp>' in line:
-                timeStamp = timeStamp.replace('\t', '')
-                timeStamp = timeStamp.replace('\n', '')
-                timeStamp = timeStamp.replace('T', ' ')
-                timeStamp = timeStamp.replace('Z', '')
-                timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
-                timeStamp = timeStamp.lstrip(' ')
-                revDict['timeStamp'] = timeStamp
-                timeStamp = None
+                try:
+                    timeStamp = timeStamp.replace('\t', '')
+                    timeStamp = timeStamp.replace('\n', '')
+                    timeStamp = timeStamp.replace('T', ' ')
+                    timeStamp = timeStamp.replace('Z', '')
+                    timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
+                    timeStamp = timeStamp.lstrip(' ')
+                    revDict['timeStamp'] = timeStamp
+                    timeStamp = None
+                except AttributeError:
+                    print(line)
 
             if '<username>' in line:
                 userName = line
