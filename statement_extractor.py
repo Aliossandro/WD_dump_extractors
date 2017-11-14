@@ -445,6 +445,7 @@ def file_extractor(file_name):
                 revId = revId.replace('<id>', '')
                 revId = revId.replace('</id>', '')
                 revDict['revId'] = revId
+                print(revDict)
                 revId = None
                 revi = False
 
