@@ -476,6 +476,7 @@ def file_extractor(file_name):
                 userName = userName.rstrip()
                 revDict['userName'] = userName
                 userName = None
+
             elif '<ip>' in line:
                 userName = line
                 userName = userName.lstrip()
@@ -483,11 +484,12 @@ def file_extractor(file_name):
                 revDict['userName'] = userName
                 userName = None
 
-            print(revDict)
-            revMetadata.append(revDict)
+
 
             if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
+                print(revDict)
+                revMetadata.append(revDict)
                 try:
                     parsed_json = ujson.loads(parsed_line)
                     rev_process = extr_rev_data(parsed_json, revDict['revId'])
@@ -500,8 +502,9 @@ def file_extractor(file_name):
                     pass
                 except KeyError:
                     print(revDict)
+                finally:
+                    revDict = {}
 
-            revDict = {}
 
             # counter += 1
 
