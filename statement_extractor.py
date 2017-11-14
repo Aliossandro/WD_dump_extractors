@@ -62,11 +62,12 @@ def create_table():
 		CREATE TABLE IF NOT EXISTS statementsData_201710 (
 		    itemId VARCHAR(255),
 		    revId VARCHAR(255),
-			statementId VARCHAR(255) PRIMARY KEY,
+			statementId VARCHAR(255),
 			statProperty VARCHAR(255),
             statValue VARCHAR(500),
             statRank VARCHAR(255),
-            statType VARCHAR(255)
+            statType VARCHAR(255),
+            PRIMARY KEY(revId, statementId)
 		)
 		"""
     ###reference table query
