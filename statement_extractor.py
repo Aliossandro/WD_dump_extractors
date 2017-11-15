@@ -393,11 +393,11 @@ def extr_rev_data(revision, revId):
         return statement_data
 
     except KeyError as k:
-        # print(k)
-        pass
+        print(k, revId)
+        # pass
     except TypeError as t:
-        # print(t, 'mii')
-        pass
+        print(t, revId, 'mii')
+        # pass
 
 
 ###extract file
@@ -470,14 +470,20 @@ def file_extractor(file_name):
 
             if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
-                if 'parId' not in revDict.keys():
-                    revDict['parId'] = 'None'
-                revMetadata.append(revDict)
                 try:
                     parsed_json = ujson.loads(parsed_line)
+                    revDict['itemId'] = parsed_json['id']
+                    if 'parId' not in revDict.keys():
+                        revDict['parId'] = 'None'
+                    revMetadata.append(revDict)
                     rev_process = extr_rev_data(parsed_json, revDict['revId'])
                     revision_processed.append(rev_process)
+
                 except ValueError as e:
+                    revDict['itemId'] = 'not extracted'
+                    if 'parId' not in revDict.keys():
+                        revDict['parId'] = 'None'
+                    revMetadata.append(revDict)
                     # print(e)
                     # print(parsed_line)
                     # revDict = {}
@@ -489,10 +495,10 @@ def file_extractor(file_name):
 
 
             # counter += 1
-            if counterImport == 3:
-                cleanDuplicates()
-                print('Duplicated cleaned')
-                counterImport = 0
+            # if counterImport == 3:
+            #     cleanDuplicates()
+            #     print('Duplicated cleaned')
+            #     counterImport = 0
 
             if counter >= 100000:
                 counterImport += 1
