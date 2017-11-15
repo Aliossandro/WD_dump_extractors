@@ -124,7 +124,7 @@ def cleanDuplicates():
     """
 
     referenceQuery = """
-    DELETE FROM referenceData_201710 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_201710 ) t WHERE t.row_num > 1 )
+    DELETE FROM referenceData_201710 WHERE revId IN ( SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_201710 ) t WHERE t.row_num > 1 )
     """
 
     qualifierQuery = """
