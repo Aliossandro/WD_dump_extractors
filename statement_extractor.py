@@ -358,7 +358,7 @@ def extr_statement(text_wd, itemId, revId):
     if 'references' in text_wd:
         for idx, ref in enumerate(text_wd['references']):
             refId = dictStat['statementId'] + '-' + str(idx)
-            ref_data = ref_loop(ref, refId, dictStat['statementId'])
+            ref_data = ref_loop(ref, refId, dictStat['statementId'], revId)
 
     else:
         ref_data = None
