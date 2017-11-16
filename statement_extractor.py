@@ -393,7 +393,7 @@ def extr_rev_data(revision, revId):
         return statement_data
 
     except KeyError as k:
-        print(k, revId)
+        print(k, 'cosa')
         # pass
     except TypeError as t:
         print(t, revId, 'mii')
