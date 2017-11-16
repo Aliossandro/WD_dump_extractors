@@ -407,6 +407,7 @@ def file_extractor(file_name):
     new_counter = 0
     counter = 0
     counterImport = 0
+    record = False
     revId = None
     parId = None
     timeStamp = None
@@ -417,11 +418,22 @@ def file_extractor(file_name):
 
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
-            if '<revision>' in line:
+            if '<title>' in line:
+                itemId = line
+                itemId = itemId.lstrip()
+                itemId = itemId.replace('<title>', '')
+                itemId = itemId.replace('</title>', '')
+                itemId = itemId.rstrip()
+                itemId = itemId.replace('Property:', '')
+                if re.match('[PQ][0-9]{1,}', itemId):
+                    record = True
+                    itemSaved = itemId
+
+            if '<revision>' in line and record:
                 counter += 1
                 revi = True
 
-            if '<id>' in line and revi is True:
+            if ('<id>' in line and revi is True) and record:
                 revId = line
                 revId = revId.lstrip()
                 revId = revId.replace('<id>', '')
@@ -431,7 +443,7 @@ def file_extractor(file_name):
                 revId = None
                 revi = False
 
-            if '<parentid>' in line:
+            if '<parentid>' in line and record:
                 parId = line
                 parId = parId.lstrip()
                 parId = parId.replace('<parentid>', '')
@@ -440,7 +452,7 @@ def file_extractor(file_name):
                 revDict['parId'] = parId
                 parId = None
 
-            if '<timestamp>' in line:
+            if '<timestamp>' in line and record:
                 timeStamp = line.replace('\t', '')
                 timeStamp = timeStamp.replace('\n', '')
                 timeStamp = timeStamp.replace('T', ' ')
@@ -451,7 +463,7 @@ def file_extractor(file_name):
                 revDict['timeStamp'] = timeStamp
                 timeStamp = None
 
-            if '<username>' in line:
+            if '<username>' in line and record:
                 userName = line
                 userName = userName.lstrip()
                 userName = re.sub(r'<username>|</username>', '', userName)
@@ -459,7 +471,7 @@ def file_extractor(file_name):
                 revDict['userName'] = userName
                 userName = None
 
-            elif '<ip>' in line:
+            elif '<ip>' in line and record:
                 userName = line
                 userName = userName.lstrip()
                 userName = re.sub(r'<ip>|</ip>', '', userName)
@@ -467,23 +479,20 @@ def file_extractor(file_name):
                 userName = None
 
 
+            if '<text xml:space="preserve">' in line and record:
+                revDict['itemId'] = itemSaved
+                if 'parId' not in revDict.keys():
+                    revDict['parId'] = 'None'
+                revMetadata.append(revDict)
 
-            if '<text xml:space="preserve">' in line:
                 parsed_line = h_parser(line)
                 try:
                     parsed_json = ujson.loads(parsed_line)
-                    revDict['itemId'] = parsed_json['id']
-                    if 'parId' not in revDict.keys():
-                        revDict['parId'] = 'None'
-                    revMetadata.append(revDict)
+
                     rev_process = extr_rev_data(parsed_json, revDict['revId'])
                     revision_processed.append(rev_process)
 
                 except ValueError as e:
-                    revDict['itemId'] = 'not extracted'
-                    if 'parId' not in revDict.keys():
-                        revDict['parId'] = 'None'
-                    revMetadata.append(revDict)
                     # print(e)
                     # print(parsed_line)
                     # revDict = {}
@@ -492,6 +501,9 @@ def file_extractor(file_name):
                     print(revDict)
                 finally:
                     revDict = {}
+
+            if '</page>' in line:
+                record = False
 
 
             # counter += 1
