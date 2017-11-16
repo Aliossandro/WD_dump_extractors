@@ -50,6 +50,7 @@ def create_table():
     ###statement table query
     query_table_1 = """
     		CREATE TABLE IF NOT EXISTS revisionData_20171001 (    		    
+    			itemId VARCHAR(255),
     			revId VARCHAR(255) PRIMARY KEY,
     			parId VARCHAR(255),
                 timeStamp VARCHAR(255),
@@ -532,7 +533,7 @@ def file_extractor(file_name):
                     cur = conn.cursor()
                     try:
                         cur.executemany(
-                            """INSERT INTO revisionData_20171001 (parId, revId, timeStamp, userName) VALUES (%(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                             revMetadata)
                         conn.commit()
                         # print('imported')
@@ -541,7 +542,7 @@ def file_extractor(file_name):
                         for stat in revMetadata:
                             try:
                                 cur.execute(
-                                    """INSERT INTO revisionData_20171001 (parId, revId, timeStamp, userName) VALUES (%(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                             stat)
                                 conn.commit()
                             except:
@@ -661,6 +662,48 @@ def file_extractor(file_name):
             #
             conn = get_db_params()
             cur = conn.cursor()
+            try:
+                cur.executemany(
+                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                    revMetadata)
+                conn.commit()
+                # print('imported')
+            except:
+                conn.rollback()
+                for stat in revMetadata:
+                    try:
+                        cur.execute(
+                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                            stat)
+                        conn.commit()
+                    except:
+                        conn.rollback()
+                        e = sys.exc_info()[0]
+                        print("<p>Error: %s</p>" % e)
+                        print('not imported, revision id error')
+                        print(stat)
+
+            try:
+                cur.executemany(
+                    """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                    statement_all)
+                conn.commit()
+                # print('imported')
+            except:
+                conn.rollback()
+                for stat in statement_all:
+                    try:
+                        cur.execute(
+                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                            stat)
+                        conn.commit()
+                    except:
+                        conn.rollback()
+                        e = sys.exc_info()[0]
+                        print("<p>Error: %s</p>" % e)
+                        print('not imported')
+                        print(stat)
+                        
             try:
                 cur.executemany(
                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
