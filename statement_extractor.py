@@ -156,7 +156,7 @@ def get_max_rows(df):
 
 def get_max_rowsQual(df):
     B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revid.transform(min)
-    return df[df.revid == B_maxes
+    return df[df.revid == B_maxes]
 
 def get_max_rowsRef(df):
     B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revid.transform(min)
