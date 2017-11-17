@@ -2,7 +2,7 @@
 import os
 import sys
 import re
-# import pandas as pd
+import pandas as pd
 # reload(sys)
 # sys.setdefaultencoding("utf8")
 import ujson
@@ -118,39 +118,154 @@ def create_table():
 
 #Delete duplicates
 
-def cleanDuplicates():
+# def cleanDuplicates():
+#
+#     statementQuery = """
+#     DELETE FROM statementsData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num FROM statementsData_20171001 ) t WHERE t.row_num > 1 )
+#     """
+#
+#     referenceQuery = """
+#     DELETE FROM referenceData_20171001 WHERE revId IN ( SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_20171001 ) t WHERE t.row_num > 1 )
+#     """
+#
+#     qualifierQuery = """
+#     DELETE FROM qualifierData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_20171001 ) t WHERE t.row_num > 1 )
+#     """
+#     query_list = [statementQuery, referenceQuery, qualifierQuery]
+#     conn = None
+#
+#
+#     conn = get_db_params()
+#     cur = conn.cursor()
+#
+#     for query in query_list:
+#         try:
+#             cur.execute(query)
+#         except (Exception, psycopg2.DatabaseError) as error:
+#             print(error)
+#
+#     cur.close()
+#     conn.commit()
+#
+#     if conn is not None:
+#         conn.close()
 
-    statementQuery = """
-    DELETE FROM statementsData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num FROM statementsData_20171001 ) t WHERE t.row_num > 1 )
-    """
+def get_max_rows(df):
+    B_maxes = df.groupby(['statementId', 'statValue']).revid.transform(min)
+    return df[df.revid == B_maxes]
 
-    referenceQuery = """
-    DELETE FROM referenceData_20171001 WHERE revId IN ( SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_20171001 ) t WHERE t.row_num > 1 )
-    """
+def get_max_rowsQual(df):
+    B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revid.transform(min)
+    return df[df.revid == B_maxes
 
-    qualifierQuery = """
-    DELETE FROM qualifierData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_20171001 ) t WHERE t.row_num > 1 )
-    """
-    query_list = [statementQuery, referenceQuery, qualifierQuery]
-    conn = None
+def get_max_rowsRef(df):
+    B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revid.transform(min)
+    return df[df.revid == B_maxes]
 
+def getDeleted(dfStat, dfRev):
 
-    conn = get_db_params()
-    cur = conn.cursor()
+    # dfStat.revid = dfStat['revid'].astype('int')
+    lastRev = dfStat.revid.max()
+    dfRev.revid = dfRev['revId'].astype('int')
+    itemId = dfStat['itemId'].unique()
+    itemId = itemId[0]
+    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = sorted(revList)
 
-    for query in query_list:
-        try:
-            cur.execute(query)
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
+    try:
+        position = revList.index(lastRev)
 
-    cur.close()
-    conn.commit()
+        if position != (len(revList) - 1):
+            # deleted = False
+            # print('not deleted')
+        # else:
+            # deleted = True
+            # timeStamp = dfRev['timestamp'][dfRev['revid'] == revList[position+1]]
+            statementId = dfStat['statementId'].unique()
+            statementId = statementId[0]
+            statproperty = dfStat['statProperty'].unique()
+            statproperty = statproperty[0]
+            stattype = dfStat['statType'].unique()
+            stattype = stattype[0]
+            dictDel = {'itemId':itemId, 'revId':revList[position+1], 'statementId':statementId, 'statProperty':statproperty, 'statRank':'normal', 'statType':stattype, 'statValue':'deleted'}
+            # print('deleted')
 
-    if conn is not None:
-        conn.close()
+            return dictDel
 
+    except ValueError:
+        print(lastRev, 'not in list')
 
+def getDeletedQual(dfStat, dfRev):
+
+    # dfStat.revid = dfStat['revid'].astype('int')
+    lastRev = dfStat.revid.max()
+    dfRev.revid = dfRev['revId'].astype('int')
+    itemId = dfStat['qualifierId'].unique()[0]
+    itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
+    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = sorted(revList)
+
+    try:
+        position = revList.index(lastRev)
+
+        if position != (len(revList) - 1):
+            # deleted = False
+            # print('not deleted')
+            # else:
+            # deleted = True
+            # timeStamp = dfRev['timestamp'][dfRev['revid'] == revList[position+1]]
+            statementId = dfStat['statementId'].unique()
+            statementId = statementId[0]
+            qualifierid = dfStat['qualifierId'].unique()
+            qualifierid = qualifierid[0]
+            qualproperty = dfStat['qualProperty'].unique()
+            qualproperty = qualproperty[0]
+            qualtype = dfStat['qualType'].unique()
+            qualtype = qualtype[0]
+            dictDel = {'revId': revList[position + 1], 'qualifierId': qualifierid,
+                       'qualProperty': qualproperty, 'qualType': qualtype, 'qualValue': 'deleted', 'statementId': statementId}
+            # print('deleted')
+
+            return dictDel
+
+    except ValueError:
+        print(lastRev, 'not in list')
+
+def getDeletedRef(dfStat, dfRev):
+
+    # dfStat.revid = dfStat['revid'].astype('int')
+    lastRev = dfStat.revid.max()
+    dfRev.revid = dfRev['revId'].astype('int')
+    itemId = dfStat['referenceId'].unique()[0]
+    itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
+    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = sorted(revList)
+
+    try:
+        position = revList.index(lastRev)
+
+        if position != (len(revList) - 1):
+            # deleted = False
+            # print('not deleted')
+            # else:
+            # deleted = True
+            # timeStamp = dfRev['timestamp'][dfRev['revid'] == revList[position+1]]
+            statementId = dfStat['statementId'].unique()
+            statementId = statementId[0]
+            referenceid = dfStat['referenceId'].unique()
+            referenceid = referenceid[0]
+            refproperty = dfStat['refProperty'].unique()
+            refproperty = refproperty[0]
+            reftype = dfStat['refType'].unique()
+            reftype = reftype[0]
+            dictDel = {'revId': revList[position + 1], 'referenceId': referenceid,
+                       'refProperty': refproperty, 'reftype': reftype, 'refValue': 'deleted', 'statementId': statementId}
+            # print('deleted')
+
+            return dictDel
+
+    except ValueError:
+        print(lastRev, 'not in list')
 
 # This function cleans the item data
 
@@ -407,7 +522,7 @@ def file_extractor(file_name):
     revision_processed = []
     new_counter = 0
     counter = 0
-    counterImport = 0
+    # counterImport = 0
     record = False
     revId = None
     parId = None
@@ -514,20 +629,19 @@ def file_extractor(file_name):
             #     counterImport = 0
 
             if counter >= 100000:
-                counterImport += 1
+                # counterImport += 1
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
                 revision_processed_clean = list(zip(*revision_processed_clean))
 
                 try:
-                    statement_all = list(filter(None, revision_processed_clean[0]))
                     # print(statement_all)
 
                     # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
                     # statement_all = list(itertools.chain.from_iterable(statement_all))
                     # statement_all = list(filter(None, statement_all))
-                    #
+                    #`
 
                     conn = get_db_params()
                     cur = conn.cursor()
@@ -552,7 +666,25 @@ def file_extractor(file_name):
                                 print('not imported, revision id error')
                                 print(stat)
 
+                    dfRev = pd.DataFrame(revMetadata)
+
                     try:
+                        statement_all = list(filter(None, revision_processed_clean[0]))
+
+                        revisionDf = pd.DataFrame(statement_all)
+                        revisionDf.statementid = revisionDf['statementId'].astype('category')
+                        revisionDf.revid = revisionDf['revId'].astype('int')
+                        revisionDf.itemid = revisionDf['itemId'].astype('category')
+                        uniStats = get_max_rows(revisionDf)
+                        dicto = uniStats.to_dict('records')
+                        print('duplicates removed')
+
+                        delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
+                        delStats = list(filter(None, list(delStats)))
+                        print('deleted statements added')
+                        statement_all = dicto + delStats
+                        print('new statement df')
+
                         cur.executemany(
                             """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                             statement_all)
@@ -578,8 +710,21 @@ def file_extractor(file_name):
                     references_all = list(filter(None, revision_processed_clean[1]))
                     references_all = list(itertools.chain.from_iterable(references_all))
                     # print(references_all)
+                    revisionDf = pd.DataFrame(references_all)
+                    revisionDf.statementid = revisionDf['referenceId'].astype('category')
+                    revisionDf.revid = revisionDf['revId'].astype('int')
+                    uniStats = get_max_rowsRef(revisionDf)
+                    dicto = uniStats.to_dict('records')
+                    print('duplicates removed ref')
+
+                    delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
+                    delStats = list(filter(None, list(delStats)))
+                    print('deleted refs added')
+                    references_all = dicto + delStats
+                    print('new statement df refs')
 
                     try:
+
                         cur.executemany(
                             """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
                             references_all)
@@ -608,6 +753,18 @@ def file_extractor(file_name):
                     else:
                         qualifier_all = list(filter(None, revision_processed_clean[2]))
                         qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+                        revisionDf = pd.DataFrame(qualifier_all)
+                        revisionDf.statementid = revisionDf['qualifierId'].astype('category')
+                        revisionDf.revid = revisionDf['revId'].astype('int')
+                        uniStats = get_max_rowsQual(revisionDf)
+                        dicto = uniStats.to_dict('records')
+                        print('duplicates removed qual')
+
+                        delStats = revisionDf.groupby('qualifierId').apply(getDeletedQual, dfRev)
+                        delStats = list(filter(None, list(delStats)))
+                        print('deleted quals added')
+                        references_all = dicto + delStats
+                        print('new statement df quals')
 
                         try:
                             cur.executemany(
@@ -654,6 +811,19 @@ def file_extractor(file_name):
 
         try:
             statement_all = list(filter(None, revision_processed_clean[0]))
+            revisionDf = pd.DataFrame(statement_all)
+            revisionDf.statementid = revisionDf['statementId'].astype('category')
+            revisionDf.revid = revisionDf['revId'].astype('int')
+            revisionDf.itemid = revisionDf['itemId'].astype('category')
+            uniStats = get_max_rows(revisionDf)
+            dicto = uniStats.to_dict('records')
+            print('duplicates removed')
+
+            delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
+            delStats = list(filter(None, list(delStats)))
+            print('deleted statements added')
+            statement_all = dicto + delStats
+            print('new statement df')
             # print(statement_all)
 
             # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
@@ -703,7 +873,7 @@ def file_extractor(file_name):
                         print("<p>Error: %s</p>" % e)
                         print('not imported')
                         print(stat)
-                        
+
             try:
                 cur.executemany(
                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
@@ -729,6 +899,18 @@ def file_extractor(file_name):
             references_all = list(filter(None, revision_processed_clean[1]))
             references_all = list(itertools.chain.from_iterable(references_all))
             # print(references_all)
+            revisionDf = pd.DataFrame(references_all)
+            revisionDf.statementid = revisionDf['referenceId'].astype('category')
+            revisionDf.revid = revisionDf['revId'].astype('int')
+            uniStats = get_max_rowsRef(revisionDf)
+            dicto = uniStats.to_dict('records')
+            print('duplicates removed ref')
+
+            delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
+            delStats = list(filter(None, list(delStats)))
+            print('deleted refs added')
+            references_all = dicto + delStats
+            print('new statement df refs')
 
             try:
                 cur.executemany(
@@ -758,6 +940,20 @@ def file_extractor(file_name):
             else:
                 qualifier_all = list(filter(None, revision_processed_clean[2]))
                 qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+                qualifier_all = list(filter(None, revision_processed_clean[2]))
+                qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+                revisionDf = pd.DataFrame(qualifier_all)
+                revisionDf.statementid = revisionDf['qualifierId'].astype('category')
+                revisionDf.revid = revisionDf['revId'].astype('int')
+                uniStats = get_max_rowsQual(revisionDf)
+                dicto = uniStats.to_dict('records')
+                print('duplicates removed qual')
+
+                delStats = revisionDf.groupby('qualifierId').apply(getDeletedQual, dfRev)
+                delStats = list(filter(None, list(delStats)))
+                print('deleted quals added')
+                references_all = dicto + delStats
+                print('new statement df quals')
 
                 try:
                     cur.executemany(
