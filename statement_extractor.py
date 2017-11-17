@@ -166,7 +166,7 @@ def getDeleted(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
     lastRev = dfStat.revId.max()
-    dfRev.revid = dfRev['revId'].astype('int')
+    dfRev.revId = dfRev['revId'].astype('int')
     itemId = dfStat['itemId'].unique()
     itemId = itemId[0]
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
@@ -187,7 +187,7 @@ def getDeleted(dfStat, dfRev):
             statproperty = statproperty[0]
             stattype = dfStat['statType'].unique()
             stattype = stattype[0]
-            dictDel = {'itemId':itemId, 'revId':revList[position+1], 'statementId':statementId, 'statProperty':statproperty, 'statRank':'normal', 'statType':stattype, 'statValue':'deleted'}
+            dictDel = {'itemId':itemId, 'revId':revList[position+1], 'statementId': statementId, 'statProperty':statproperty, 'statRank':'normal', 'statType': stattype, 'statValue': 'deleted'}
             # print('deleted')
 
             return dictDel
@@ -199,7 +199,7 @@ def getDeletedQual(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
     lastRev = dfStat.revId.max()
-    dfRev.revid = dfRev['revId'].astype('int')
+    dfRev.revId = dfRev['revId'].astype('int')
     itemId = dfStat['qualifierId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
@@ -235,7 +235,7 @@ def getDeletedRef(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
     lastRev = dfStat.revId.max()
-    dfRev.revid = dfRev['revId'].astype('int')
+    dfRev.revId = dfRev['revId'].astype('int')
     itemId = dfStat['referenceId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
@@ -630,6 +630,7 @@ def file_extractor(file_name):
 
             if counter >= 100000:
                 # counterImport += 1
+                dfRev = pd.DataFrame(revMetadata)
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
@@ -666,7 +667,7 @@ def file_extractor(file_name):
                                 print('not imported, revision id error')
                                 print(stat)
 
-                    dfRev = pd.DataFrame(revMetadata)
+
 
                     try:
                         statement_all = list(filter(None, revision_processed_clean[0]))
