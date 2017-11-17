@@ -152,15 +152,15 @@ def create_table():
 
 def get_max_rows(df):
     B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min)
-    return df[df.revid == B_maxes]
+    return df[df.revId == B_maxes]
 
 def get_max_rowsQual(df):
     B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revId.transform(min)
-    return df[df.revid == B_maxes]
+    return df[df.revId == B_maxes]
 
 def get_max_rowsRef(df):
     B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revId.transform(min)
-    return df[df.revid == B_maxes]
+    return df[df.revId == B_maxes]
 
 def getDeleted(dfStat, dfRev):
 
