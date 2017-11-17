@@ -193,7 +193,7 @@ def getDeleted(dfStat, dfRev):
             return dictDel
 
     except ValueError:
-        print(lastRev, 'not in list')
+        print(lastRev, 'not in list; item ', itemId)
 
 def getDeletedQual(dfStat, dfRev):
 
@@ -229,7 +229,7 @@ def getDeletedQual(dfStat, dfRev):
             return dictDel
 
     except ValueError:
-        print(lastRev, 'not in list')
+        print(lastRev, 'not in list; item ', itemId)
 
 def getDeletedRef(dfStat, dfRev):
 
@@ -265,7 +265,7 @@ def getDeletedRef(dfStat, dfRev):
             return dictDel
 
     except ValueError:
-        print(lastRev, 'not in list')
+        print(lastRev, 'not in list; item ', itemId)
 
 # This function cleans the item data
 
