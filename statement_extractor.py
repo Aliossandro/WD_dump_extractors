@@ -628,178 +628,178 @@ def file_extractor(file_name):
             #     print('Duplicated cleaned')
             #     counterImport = 0
 
-            if counter >= 100000:
-                # counterImport += 1
-                dfRev = pd.DataFrame(revMetadata)
-
-                revision_processed = list(filter(None, revision_processed))
-                revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
-                revision_processed_clean = list(zip(*revision_processed_clean))
-
-                try:
-                    # print(statement_all)
-
-                    # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
-                    # statement_all = list(itertools.chain.from_iterable(statement_all))
-                    # statement_all = list(filter(None, statement_all))
-                    #`
-
-                    conn = get_db_params()
-                    cur = conn.cursor()
-                    try:
-                        cur.executemany(
-                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            revMetadata)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in revMetadata:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported, revision id error')
-                                print(stat)
-
-
-
-                    try:
-                        statement_all = list(filter(None, revision_processed_clean[0]))
-
-                        revisionDf = pd.DataFrame(statement_all)
-                        revisionDf.statementId = revisionDf['statementId'].astype('category')
-                        revisionDf.revId = revisionDf['revId'].astype('int')
-                        revisionDf.itemId = revisionDf['itemId'].astype('category')
-                        uniStats = get_max_rows(revisionDf)
-                        dicto = uniStats.to_dict('records')
-                        print('duplicates removed')
-
-                        delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
-                        delStats = list(filter(None, list(delStats)))
-                        print('deleted statements added')
-                        statement_all = dicto + delStats
-                        print('new statement df')
-
-                        cur.executemany(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                            statement_all)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in statement_all:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                                    stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
-                                print(stat)
-                                # break
-                        # break
-
-                    references_all = list(filter(None, revision_processed_clean[1]))
-                    references_all = list(itertools.chain.from_iterable(references_all))
-                    # print(references_all)
-                    revisionDf = pd.DataFrame(references_all)
-                    revisionDf.referenceId = revisionDf['referenceId'].astype('category')
-                    revisionDf.revId = revisionDf['revId'].astype('int')
-                    uniStats = get_max_rowsRef(revisionDf)
-                    dicto = uniStats.to_dict('records')
-                    print('duplicates removed ref')
-
-                    delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
-                    delStats = list(filter(None, list(delStats)))
-                    print('deleted refs added')
-                    references_all = dicto + delStats
-                    print('new statement df refs')
-
-                    try:
-
-                        cur.executemany(
-                            """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                            references_all)
-                        conn.commit()
-                        # print('references imported')
-                    except:
-                        conn.rollback()
-                        for ref in references_all:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                                    ref)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
-                                print(ref)
-                                # break
-
-                        # break
-
-                    if all(v is None for v in revision_processed_clean[2]):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
-                        pass
-                    else:
-                        qualifier_all = list(filter(None, revision_processed_clean[2]))
-                        qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                        revisionDf = pd.DataFrame(qualifier_all)
-                        revisionDf.qualId = revisionDf['qualId'].astype('category')
-                        revisionDf.revId = revisionDf['revId'].astype('int')
-                        uniStats = get_max_rowsQual(revisionDf)
-                        dicto = uniStats.to_dict('records')
-                        print('duplicates removed qual')
-
-                        delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
-                        delStats = list(filter(None, list(delStats)))
-                        print('deleted quals added')
-                        references_all = dicto + delStats
-                        print('new statement df quals')
-
-                        try:
-                            cur.executemany(
-                                """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                qualifier_all)
-                            conn.commit()
-                            # print('qualifiers imported')
-                        except:
-                            conn.rollback()
-                            for qual in qualifier_all:
-                                try:
-                                    cur.execute(
-                                        """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                        qual)
-                                    conn.commit()
-                                except:
-                                    conn.rollback()
-                                    e = sys.exc_info()[0]
-                                    print("<p>Error: %s</p>" % e)
-                                    print('not imported')
-                                    print(qual)
-                                    # break
-
-                            # print(qualifier_all)
-
-                except IndexError as ie:
-                    print(ie, revision_processed_clean)
-                    # break
-
-                revision_processed = []
-                revMetadata = []
-                new_counter += counter
-                print('done!', new_counter)
-                counter = 0
+            # if counter >= 500000:
+            #     # counterImport += 1
+            #     dfRev = pd.DataFrame(revMetadata)
+            #
+            #     revision_processed = list(filter(None, revision_processed))
+            #     revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
+            #     revision_processed_clean = list(zip(*revision_processed_clean))
+            #
+            #     try:
+            #         # print(statement_all)
+            #
+            #         # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
+            #         # statement_all = list(itertools.chain.from_iterable(statement_all))
+            #         # statement_all = list(filter(None, statement_all))
+            #         #`
+            #
+            #         conn = get_db_params()
+            #         cur = conn.cursor()
+            #         try:
+            #             cur.executemany(
+            #                 """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+            #                 revMetadata)
+            #             conn.commit()
+            #             # print('imported')
+            #         except:
+            #             conn.rollback()
+            #             for stat in revMetadata:
+            #                 try:
+            #                     cur.execute(
+            #                         """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+            #                 stat)
+            #                     conn.commit()
+            #                 except:
+            #                     conn.rollback()
+            #                     e = sys.exc_info()[0]
+            #                     print("<p>Error: %s</p>" % e)
+            #                     print('not imported, revision id error')
+            #                     print(stat)
+            #
+            #
+            #
+            #         try:
+            #             statement_all = list(filter(None, revision_processed_clean[0]))
+            #
+            #             # revisionDf = pd.DataFrame(statement_all)
+            #             # revisionDf.statementId = revisionDf['statementId'].astype('category')
+            #             # revisionDf.revId = revisionDf['revId'].astype('int')
+            #             # revisionDf.itemId = revisionDf['itemId'].astype('category')
+            #             # uniStats = get_max_rows(revisionDf)
+            #             # dicto = uniStats.to_dict('records')
+            #             # print('duplicates removed')
+            #             #
+            #             # delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
+            #             # delStats = list(filter(None, list(delStats)))
+            #             # print('deleted statements added')
+            #             # statement_all = dicto + delStats
+            #             # print('new statement df')
+            #
+            #             cur.executemany(
+            #                 """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+            #                 statement_all)
+            #             conn.commit()
+            #             # print('imported')
+            #         except:
+            #             conn.rollback()
+            #             for stat in statement_all:
+            #                 try:
+            #                     cur.execute(
+            #                         """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+            #                         stat)
+            #                     conn.commit()
+            #                 except:
+            #                     conn.rollback()
+            #                     e = sys.exc_info()[0]
+            #                     print("<p>Error: %s</p>" % e)
+            #                     print('not imported')
+            #                     print(stat)
+            #                     # break
+            #             # break
+            #
+            #         references_all = list(filter(None, revision_processed_clean[1]))
+            #         references_all = list(itertools.chain.from_iterable(references_all))
+            #         # print(references_all)
+            #         # revisionDf = pd.DataFrame(references_all)
+            #         # revisionDf.referenceId = revisionDf['referenceId'].astype('category')
+            #         # revisionDf.revId = revisionDf['revId'].astype('int')
+            #         # uniStats = get_max_rowsRef(revisionDf)
+            #         # dicto = uniStats.to_dict('records')
+            #         # print('duplicates removed ref')
+            #         #
+            #         # delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
+            #         # delStats = list(filter(None, list(delStats)))
+            #         # print('deleted refs added')
+            #         # references_all = dicto + delStats
+            #         # print('new statement df refs')
+            #
+            #         try:
+            #
+            #             cur.executemany(
+            #                 """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+            #                 references_all)
+            #             conn.commit()
+            #             # print('references imported')
+            #         except:
+            #             conn.rollback()
+            #             for ref in references_all:
+            #                 try:
+            #                     cur.execute(
+            #                         """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+            #                         ref)
+            #                     conn.commit()
+            #                 except:
+            #                     conn.rollback()
+            #                     e = sys.exc_info()[0]
+            #                     print("<p>Error: %s</p>" % e)
+            #                     print('not imported')
+            #                     print(ref)
+            #                     # break
+            #
+            #             # break
+            #
+            #         if all(v is None for v in revision_processed_clean[2]):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
+            #             pass
+            #         else:
+            #             qualifier_all = list(filter(None, revision_processed_clean[2]))
+            #             qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+            #             # revisionDf = pd.DataFrame(qualifier_all)
+            #             # revisionDf.qualId = revisionDf['qualId'].astype('category')
+            #             # revisionDf.revId = revisionDf['revId'].astype('int')
+            #             # uniStats = get_max_rowsQual(revisionDf)
+            #             # dicto = uniStats.to_dict('records')
+            #             # print('duplicates removed qual')
+            #             #
+            #             # delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
+            #             # delStats = list(filter(None, list(delStats)))
+            #             # print('deleted quals added')
+            #             # qualifier_all = dicto + delStats
+            #             # print('new statement df quals')
+            #
+            #             try:
+            #                 cur.executemany(
+            #                     """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+            #                     qualifier_all)
+            #                 conn.commit()
+            #                 # print('qualifiers imported')
+            #             except:
+            #                 conn.rollback()
+            #                 for qual in qualifier_all:
+            #                     try:
+            #                         cur.execute(
+            #                             """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+            #                             qual)
+            #                         conn.commit()
+            #                     except:
+            #                         conn.rollback()
+            #                         e = sys.exc_info()[0]
+            #                         print("<p>Error: %s</p>" % e)
+            #                         print('not imported')
+            #                         print(qual)
+            #                         # break
+            #
+            #                 # print(qualifier_all)
+            #
+            #     except IndexError as ie:
+            #         print(ie, revision_processed_clean)
+            #         # break
+            #
+            #     revision_processed = []
+            #     revMetadata = []
+            #     new_counter += counter
+            #     print('done!', new_counter)
+            #     counter = 0
                 # break
 
             # continue
@@ -953,7 +953,7 @@ def file_extractor(file_name):
                 delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                 delStats = list(filter(None, list(delStats)))
                 print('deleted quals added')
-                references_all = dicto + delStats
+                qualifier_all = dicto + delStats
                 print('new statement df quals')
 
                 try:
