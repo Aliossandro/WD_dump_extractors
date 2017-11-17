@@ -155,7 +155,7 @@ def get_max_rows(df):
     return df[df.revId == B_maxes]
 
 def get_max_rowsQual(df):
-    B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revId.transform(min)
+    B_maxes = df.groupby(['qualId', 'qualProperty', 'qualValue']).revId.transform(min)
     return df[df.revId == B_maxes]
 
 def get_max_rowsRef(df):
@@ -187,7 +187,7 @@ def getDeleted(dfStat, dfRev):
             statproperty = statproperty[0]
             stattype = dfStat['statType'].unique()
             stattype = stattype[0]
-            dictDel = {'itemId':itemId, 'revId':revList[position+1], 'statementId': statementId, 'statProperty':statproperty, 'statRank':'normal', 'statType': stattype, 'statValue': 'deleted'}
+            dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty':statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
             # print('deleted')
 
             return dictDel
@@ -200,7 +200,7 @@ def getDeletedQual(dfStat, dfRev):
     # dfStat.revid = dfStat['revid'].astype('int')
     lastRev = dfStat.revId.max()
     dfRev.revId = dfRev['revId'].astype('int')
-    itemId = dfStat['qualifierId'].unique()[0]
+    itemId = dfStat['qualId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
@@ -216,13 +216,13 @@ def getDeletedQual(dfStat, dfRev):
             # timeStamp = dfRev['timestamp'][dfRev['revid'] == revList[position+1]]
             statementId = dfStat['statementId'].unique()
             statementId = statementId[0]
-            qualifierid = dfStat['qualifierId'].unique()
-            qualifierid = qualifierid[0]
+            qualId = dfStat['qualId'].unique()
+            qualId = qualId[0]
             qualproperty = dfStat['qualProperty'].unique()
             qualproperty = qualproperty[0]
             qualtype = dfStat['qualType'].unique()
             qualtype = qualtype[0]
-            dictDel = {'revId': revList[position + 1], 'qualifierId': qualifierid,
+            dictDel = {'revId': revList[position + 1], 'qualId': qualId,
                        'qualProperty': qualproperty, 'qualType': qualtype, 'qualValue': 'deleted', 'statementId': statementId}
             # print('deleted')
 
@@ -259,7 +259,7 @@ def getDeletedRef(dfStat, dfRev):
             reftype = dfStat['refType'].unique()
             reftype = reftype[0]
             dictDel = {'revId': revList[position + 1], 'referenceId': referenceid,
-                       'refProperty': refproperty, 'reftype': reftype, 'refValue': 'deleted', 'statementId': statementId}
+                       'refProperty': refproperty, 'refType': reftype, 'refValue': 'deleted', 'statementId': statementId}
             # print('deleted')
 
             return dictDel
@@ -755,13 +755,13 @@ def file_extractor(file_name):
                         qualifier_all = list(filter(None, revision_processed_clean[2]))
                         qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
                         revisionDf = pd.DataFrame(qualifier_all)
-                        revisionDf.qualifierId = revisionDf['qualifierId'].astype('category')
+                        revisionDf.qualId = revisionDf['qualId'].astype('category')
                         revisionDf.revId = revisionDf['revId'].astype('int')
                         uniStats = get_max_rowsQual(revisionDf)
                         dicto = uniStats.to_dict('records')
                         print('duplicates removed qual')
 
-                        delStats = revisionDf.groupby('qualifierId').apply(getDeletedQual, dfRev)
+                        delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                         delStats = list(filter(None, list(delStats)))
                         print('deleted quals added')
                         references_all = dicto + delStats
@@ -944,13 +944,13 @@ def file_extractor(file_name):
                 qualifier_all = list(filter(None, revision_processed_clean[2]))
                 qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
                 revisionDf = pd.DataFrame(qualifier_all)
-                revisionDf.qualifierId = revisionDf['qualifierId'].astype('category')
+                revisionDf.qualId = revisionDf['qualId'].astype('category')
                 revisionDf.revId = revisionDf['revId'].astype('int')
                 uniStats = get_max_rowsQual(revisionDf)
                 dicto = uniStats.to_dict('records')
                 print('duplicates removed qual')
 
-                delStats = revisionDf.groupby('qualifierId').apply(getDeletedQual, dfRev)
+                delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                 delStats = list(filter(None, list(delStats)))
                 print('deleted quals added')
                 references_all = dicto + delStats
