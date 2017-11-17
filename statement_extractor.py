@@ -151,25 +151,25 @@ def create_table():
 #         conn.close()
 
 def get_max_rows(df):
-    B_maxes = df.groupby(['statementId', 'statValue']).revid.transform(min)
+    B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min)
     return df[df.revid == B_maxes]
 
 def get_max_rowsQual(df):
-    B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revid.transform(min)
+    B_maxes = df.groupby(['qualifierId', 'qualProperty', 'qualValue']).revId.transform(min)
     return df[df.revid == B_maxes]
 
 def get_max_rowsRef(df):
-    B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revid.transform(min)
+    B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revId.transform(min)
     return df[df.revid == B_maxes]
 
 def getDeleted(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
-    lastRev = dfStat.revid.max()
+    lastRev = dfStat.revId.max()
     dfRev.revid = dfRev['revId'].astype('int')
     itemId = dfStat['itemId'].unique()
     itemId = itemId[0]
-    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
 
     try:
@@ -198,11 +198,11 @@ def getDeleted(dfStat, dfRev):
 def getDeletedQual(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
-    lastRev = dfStat.revid.max()
+    lastRev = dfStat.revId.max()
     dfRev.revid = dfRev['revId'].astype('int')
     itemId = dfStat['qualifierId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
-    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
 
     try:
@@ -234,11 +234,11 @@ def getDeletedQual(dfStat, dfRev):
 def getDeletedRef(dfStat, dfRev):
 
     # dfStat.revid = dfStat['revid'].astype('int')
-    lastRev = dfStat.revid.max()
+    lastRev = dfStat.revId.max()
     dfRev.revid = dfRev['revId'].astype('int')
     itemId = dfStat['referenceId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
-    revList = dfRev[dfRev['itemId'] == itemId].revid.unique()
+    revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
 
     try:
