@@ -809,22 +809,9 @@ def file_extractor(file_name):
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
         revision_processed_clean = list(zip(*revision_processed_clean))
+        dfRev = pd.DataFrame(revMetadata)
 
         try:
-            statement_all = list(filter(None, revision_processed_clean[0]))
-            revisionDf = pd.DataFrame(statement_all)
-            revisionDf.statementId = revisionDf['statementId'].astype('category')
-            revisionDf.revId = revisionDf['revId'].astype('int')
-            revisionDf.itemId = revisionDf['itemId'].astype('category')
-            uniStats = get_max_rows(revisionDf)
-            dicto = uniStats.to_dict('records')
-            print('duplicates removed')
-
-            delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
-            delStats = list(filter(None, list(delStats)))
-            print('deleted statements added')
-            statement_all = dicto + delStats
-            print('new statement df')
             # print(statement_all)
 
             # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
@@ -854,6 +841,22 @@ def file_extractor(file_name):
                         print('not imported, revision id error')
                         print(stat)
 
+
+            statement_all = list(filter(None, revision_processed_clean[0]))
+            revisionDf = pd.DataFrame(statement_all)
+            revisionDf.statementId = revisionDf['statementId'].astype('category')
+            revisionDf.revId = revisionDf['revId'].astype('int')
+            revisionDf.itemId = revisionDf['itemId'].astype('category')
+            uniStats = get_max_rows(revisionDf)
+            dicto = uniStats.to_dict('records')
+            print('duplicates removed')
+
+            delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
+            delStats = list(filter(None, list(delStats)))
+            print('deleted statements added')
+            statement_all = dicto + delStats
+            print('new statement df')
+            
             try:
                 cur.executemany(
                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
