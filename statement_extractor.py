@@ -534,101 +534,8 @@ def file_extractor(file_name):
 
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
-            if '<title>' in line:
-                itemId = line
-                itemId = itemId.lstrip()
-                itemId = itemId.replace('<title>', '')
-                itemId = itemId.replace('</title>', '')
-                itemId = itemId.rstrip()
-                itemId = itemId.replace('Property:', '')
-                if re.match('[PQ][0-9]{1,}', itemId):
-                    counter += 1
-                    record = True
-                    itemSaved = itemId
-
-            if '<revision>' in line and record:
-                revi = True
-
-            if ('<id>' in line and revi is True) and record:
-                revId = line
-                revId = revId.lstrip()
-                revId = revId.replace('<id>', '')
-                revId = revId.replace('</id>', '')
-                revId = revId.rstrip()
-                revDict['revId'] = revId
-                revId = None
-                revi = False
-
-            if '<parentid>' in line and record:
-                parId = line
-                parId = parId.lstrip()
-                parId = parId.replace('<parentid>', '')
-                parId = parId.replace('</parentid>', '')
-                parId = parId.rstrip()
-                revDict['parId'] = parId
-                parId = None
-
-            if '<timestamp>' in line and record:
-                timeStamp = line.replace('\t', '')
-                timeStamp = timeStamp.replace('\n', '')
-                timeStamp = timeStamp.replace('T', ' ')
-                timeStamp = timeStamp.replace('Z', '')
-                timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
-                timeStamp = timeStamp.lstrip()
-                timeStamp = timeStamp.rstrip()
-                revDict['timeStamp'] = timeStamp
-                timeStamp = None
-
-            if '<username>' in line and record:
-                userName = line
-                userName = userName.lstrip()
-                userName = re.sub(r'<username>|</username>', '', userName)
-                userName = userName.rstrip()
-                revDict['userName'] = userName
-                userName = None
-
-            elif '<ip>' in line and record:
-                userName = line
-                userName = userName.lstrip()
-                userName = re.sub(r'<ip>|</ip>', '', userName)
-                revDict['userName'] = userName
-                userName = None
-
-
-            if '<text xml:space="preserve">' in line and record:
-                revDict['itemId'] = itemSaved
-                if 'parId' not in revDict.keys():
-                    revDict['parId'] = 'None'
-                revMetadata.append(revDict)
-
-                parsed_line = h_parser(line)
-                try:
-                    parsed_json = ujson.loads(parsed_line)
-
-                    rev_process = extr_rev_data(parsed_json, revDict['revId'])
-                    revision_processed.append(rev_process)
-
-                except ValueError as e:
-                    # print(e)
-                    # print(parsed_line)
-                    # revDict = {}
-                    pass
-                except KeyError:
-                    print(revDict)
-                finally:
-                    revDict = {}
-
-            if '</page>' in line:
-                record = False
-
-
-            # counter += 1
-            # if counterImport == 3:
-            #     cleanDuplicates()
-            #     print('Duplicated cleaned')
-            #     counterImport = 0
-
-            if counter >= 1000000:
+            
+            if counter >= 200000:
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
@@ -797,7 +704,100 @@ def file_extractor(file_name):
                 new_counter += counter
                 print('done!', new_counter)
                 counter = 0
-                break
+                # break
+            if '<title>' in line:
+                itemId = line
+                itemId = itemId.lstrip()
+                itemId = itemId.replace('<title>', '')
+                itemId = itemId.replace('</title>', '')
+                itemId = itemId.rstrip()
+                itemId = itemId.replace('Property:', '')
+                if re.match('[PQ][0-9]{1,}', itemId):
+                    counter += 1
+                    record = True
+                    itemSaved = itemId
+
+            if '<revision>' in line and record:
+                revi = True
+
+            if ('<id>' in line and revi is True) and record:
+                revId = line
+                revId = revId.lstrip()
+                revId = revId.replace('<id>', '')
+                revId = revId.replace('</id>', '')
+                revId = revId.rstrip()
+                revDict['revId'] = revId
+                revId = None
+                revi = False
+
+            if '<parentid>' in line and record:
+                parId = line
+                parId = parId.lstrip()
+                parId = parId.replace('<parentid>', '')
+                parId = parId.replace('</parentid>', '')
+                parId = parId.rstrip()
+                revDict['parId'] = parId
+                parId = None
+
+            if '<timestamp>' in line and record:
+                timeStamp = line.replace('\t', '')
+                timeStamp = timeStamp.replace('\n', '')
+                timeStamp = timeStamp.replace('T', ' ')
+                timeStamp = timeStamp.replace('Z', '')
+                timeStamp = re.sub(r'<timestamp>|</timestamp>', '', timeStamp)
+                timeStamp = timeStamp.lstrip()
+                timeStamp = timeStamp.rstrip()
+                revDict['timeStamp'] = timeStamp
+                timeStamp = None
+
+            if '<username>' in line and record:
+                userName = line
+                userName = userName.lstrip()
+                userName = re.sub(r'<username>|</username>', '', userName)
+                userName = userName.rstrip()
+                revDict['userName'] = userName
+                userName = None
+
+            elif '<ip>' in line and record:
+                userName = line
+                userName = userName.lstrip()
+                userName = re.sub(r'<ip>|</ip>', '', userName)
+                revDict['userName'] = userName
+                userName = None
+
+
+            if '<text xml:space="preserve">' in line and record:
+                revDict['itemId'] = itemSaved
+                if 'parId' not in revDict.keys():
+                    revDict['parId'] = 'None'
+                revMetadata.append(revDict)
+
+                parsed_line = h_parser(line)
+                try:
+                    parsed_json = ujson.loads(parsed_line)
+
+                    rev_process = extr_rev_data(parsed_json, revDict['revId'])
+                    revision_processed.append(rev_process)
+
+                except ValueError as e:
+                    # print(e)
+                    # print(parsed_line)
+                    # revDict = {}
+                    pass
+                except KeyError:
+                    print(revDict)
+                finally:
+                    revDict = {}
+
+            if '</page>' in line:
+                record = False
+
+
+            # counter += 1
+            # if counterImport == 3:
+            #     cleanDuplicates()
+            #     print('Duplicated cleaned')
+            #     counterImport = 0
 
             # continue
 
