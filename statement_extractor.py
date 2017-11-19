@@ -542,11 +542,11 @@ def file_extractor(file_name):
                 itemId = itemId.rstrip()
                 itemId = itemId.replace('Property:', '')
                 if re.match('[PQ][0-9]{1,}', itemId):
+                    counter += 1
                     record = True
                     itemSaved = itemId
 
             if '<revision>' in line and record:
-                counter += 1
                 revi = True
 
             if ('<id>' in line and revi is True) and record:
