@@ -187,7 +187,7 @@ def getDeleted(dfStat, dfRev):
             statproperty = statproperty[0]
             stattype = dfStat['statType'].unique()
             stattype = stattype[0]
-            dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty':statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
+            dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty': statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
             # print('deleted')
 
             return dictDel
@@ -608,6 +608,7 @@ def file_extractor(file_name):
                                 cur.execute(
                                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                                     stat)
+                                print(stat)
                                 conn.commit()
                             except:
                                 conn.rollback()
