@@ -19,7 +19,7 @@ def file_extractor(file_name):
         with open('15k_items.xml', 'w') as f:
             for line in inputfile:
                 f.write(line)
-                f.write('\n')
+                # f.write('\n')
 
                 if '</page>' in line:
                     counter += 1
