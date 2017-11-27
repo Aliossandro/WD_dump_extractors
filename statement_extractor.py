@@ -536,7 +536,7 @@ def file_extractor(file_name):
 
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
-            if (counter % 10) == 0:
+            if (counter % 50) == 0:
                 print(counter)
 
             elif counter >= 1000:
@@ -616,7 +616,7 @@ def file_extractor(file_name):
                                 print("<p>Error: %s</p>" % e)
                                 print('not imported')
                                 print(stat)
-                                # break
+                                break
                         # break
 
                     references_all = list(filter(None, revision_processed_clean[1]))
