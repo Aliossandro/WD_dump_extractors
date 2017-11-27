@@ -202,6 +202,7 @@ def getDeletedQual(dfStat, dfRev):
     dfRev.revId = dfRev['revId'].astype('int')
     itemId = dfStat['qualId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
+    itemId = itemId.upper()
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
 
@@ -238,6 +239,7 @@ def getDeletedRef(dfStat, dfRev):
     dfRev.revId = dfRev['revId'].astype('int')
     itemId = dfStat['referenceId'].unique()[0]
     itemId = re.search('[pP|qQ][0-9]{1,}', itemId).group(0)
+    itemId = itemId.upper()
     revList = dfRev[dfRev['itemId'] == itemId].revId.unique()
     revList = sorted(revList)
 
@@ -537,8 +539,8 @@ def file_extractor(file_name):
             if (counter % 10) == 0:
                 print(counter)
 
-            elif counter >= 20000:
-                print('20000 items')
+            elif counter >= 1000:
+                print('1000 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
