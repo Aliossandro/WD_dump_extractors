@@ -16,7 +16,7 @@ def file_extractor(file_name):
 
 
     with bz2.open(file_name, 'rt') as inputfile:
-        with open('15k_items.xml') as f:
+        with open('15k_items.xml', 'w') as f:
             for line in inputfile:
                 f.write(line)
                 f.write('\n')
