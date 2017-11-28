@@ -150,17 +150,21 @@ def create_table():
 #     if conn is not None:
 #         conn.close()
 
+# def get_max_rows(df):
+#     B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min)
+#     return df[df.revId == B_maxes]
+
 def get_max_rows(df):
-    B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min)
-    return df[df.revId == B_maxes]
+    B_maxes = df.groupby(['statValue']).revId.transform(min) == df['revId']
+    return df[B_maxes]
 
 def get_max_rowsQual(df):
-    B_maxes = df.groupby(['qualId', 'qualProperty', 'qualValue']).revId.transform(min)
-    return df[df.revId == B_maxes]
+    B_maxes = df.groupby(['qualId', 'qualProperty', 'qualValue']).revId.transform(min) == df.revId
+    return df[B_maxes]
 
 def get_max_rowsRef(df):
-    B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revId.transform(min)
-    return df[df.revId == B_maxes]
+    B_maxes = df.groupby(['referenceId', 'refProperty', 'refValue']).revId.transform(min) == df.revId
+    return df[B_maxes]
 
 def getDeleted(dfStat, dfRev):
 
@@ -188,6 +192,8 @@ def getDeleted(dfStat, dfRev):
             stattype = dfStat['statType'].unique()
             stattype = stattype[0]
             dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty': statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
+            dictDel = {'revId': revList[position + 1], 'statementId': statementId, 'itemId': itemId,
+                       'statType': stattype, 'statValue': 'deleted', 'statProperty': statproperty, 'statRank': 'normal'}
             # print('deleted')
 
             return dictDel
@@ -292,7 +298,11 @@ def ref_extract(j):
     elif ref_to_extract['refType'] == 'time':
         ref_to_extract['refValue'] = j['datavalue']['value']['time']
     elif ref_to_extract['refType'] == 'wikibase-entityid':
-        ref_to_extract['refValue'] = j['datavalue']['value']['id']
+        try:
+            ref_to_extract['refValue'] = j['datavalue']['value']['id']
+        except KeyError:
+            ref_to_extract['refValue'] = j['datavalue']['value']['numeric-id']
+            ref_to_extract['refValue'] = 'Q' + str(ref_to_extract['refValue'])
     elif ref_to_extract['refType'] == 'monolingualtext':
         ref_to_extract['refValue'] = j['datavalue']['value']['text']
     elif ref_to_extract['refType'] == 'quantity':
@@ -378,18 +388,18 @@ def qual_extractor(qualifier, stat_id, idx, revId):
                 dict_qual['qualValue'] = str(stat_value)
 
             except TypeError as e:
-                # print(e)
-                pass
+                print(e)
+                # pass
             # , text_wd['mainsnak']['datavalue']
 
             except ValueError as e:
-                # print(e)
+                print(e)
                 # print(stat_value)
-                pass
+                # pass
 
             except KeyError as e:
-                # print(e)  # , text_wd['mainsnak']
-                pass
+                print(e)  # , text_wd['mainsnak']
+                # pass
 
         else:
             dict_qual['qualProperty'] = stat_property
@@ -455,14 +465,14 @@ def extr_statement(text_wd, itemId, revId):
 
 
         except TypeError as e:
-            # print(text_wd['mainsnak'])
-            pass
+            print(text_wd['mainsnak'])
+            # pass
         # , text_wd['mainsnak']['datavalue']
 
         except ValueError as e:
-            # print(text_wd['mainsnak'])
+            print(text_wd['mainsnak'])
             # print(dictStat['statValue'])
-            pass
+            # pass
 
         except KeyError as e:
             # print(text_wd['mainsnak'])  # , text_wd['mainsnak']
@@ -510,12 +520,14 @@ def extr_rev_data(revision, revId):
 
         return statement_data
 
+
     except KeyError as k:
-        # print(k, 'cosa')
-        pass
+        print(revision, k)
+        # pass
+
     except TypeError as t:
-        # print(t, revId, 'mii')
-        pass
+        print(revision, revId, t)
+        # pass
 
 
 ###extract file
@@ -546,7 +558,8 @@ def file_extractor(file_name):
 
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
-                revision_processed_clean = list(zip(*revision_processed_clean))
+                qualifier_all = [x[2] for x in revision_processed_clean]
+                # revision_processed_clean = list(zip(*revision_processed_clean))
 
                 try:
                     # print(statement_all)
@@ -579,7 +592,9 @@ def file_extractor(file_name):
                                 print('not imported, revision id error')
                                 print(stat)
 
-                    statement_all = list(filter(None, revision_processed_clean[0]))
+                    # statement_all = list(filter(None, revision_processed_clean[0]))
+                    statement_all = [x[0] for x in revision_processed_clean]
+                    statement_all = list(filter(None, statement_all))
                     revisionDf = pd.DataFrame(statement_all)
                     revisionDf.statementId = revisionDf['statementId'].astype('category')
                     revisionDf.revId = revisionDf['revId'].astype('int')
@@ -619,7 +634,9 @@ def file_extractor(file_name):
                                 break
                         # break
 
-                    references_all = list(filter(None, revision_processed_clean[1]))
+                    references_all = [x[1] for x in revision_processed_clean]
+                    # references_all = list(filter(None, revision_processed_clean[1]))
+                    references_all = list(filter(None, references_all))
                     references_all = list(itertools.chain.from_iterable(references_all))
                     # print(references_all)
                     revisionDf = pd.DataFrame(references_all)
@@ -659,10 +676,11 @@ def file_extractor(file_name):
                                 # break
 
                         # break
-                    if all(v is None for v in revision_processed_clean[2]):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
-                        pass
-                    else:
-                        qualifier_all = list(filter(None, revision_processed_clean[2]))
+                    if any(v is not None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
+                    #     pass
+                    # else:
+
+                        qualifier_all = list(filter(None, qualifier_all))
                         qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
                         revisionDf = pd.DataFrame(qualifier_all)
                         revisionDf.qualId = revisionDf['qualId'].astype('category')
@@ -764,6 +782,11 @@ def file_extractor(file_name):
                 revDict['userName'] = userName
                 userName = None
 
+                revDict['itemId'] = itemSaved
+                if 'parId' not in revDict.keys():
+                    revDict['parId'] = 'None'
+                revMetadata.append(revDict)
+
             elif '<ip>' in line and record:
                 userName = line
                 userName = userName.lstrip()
@@ -771,12 +794,13 @@ def file_extractor(file_name):
                 revDict['userName'] = userName
                 userName = None
 
-
-            if '<text xml:space="preserve">' in line and record:
                 revDict['itemId'] = itemSaved
                 if 'parId' not in revDict.keys():
                     revDict['parId'] = 'None'
                 revMetadata.append(revDict)
+
+
+            if '<text xml:space="preserve">' in line and record:
 
                 parsed_line = h_parser(line)
                 try:
@@ -810,7 +834,9 @@ def file_extractor(file_name):
 
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
-        revision_processed_clean = list(zip(*revision_processed_clean))
+        # revision_processed_clean = list(zip(*revision_processed_clean))
+        qualifier_all = [x[2] for x in revision_processed_clean]
+
         dfRev = pd.DataFrame(revMetadata)
 
         try:
@@ -844,7 +870,9 @@ def file_extractor(file_name):
                         print(stat)
 
 
-            statement_all = list(filter(None, revision_processed_clean[0]))
+            # statement_all = list(filter(None, revision_processed_clean[0]))
+            statement_all = [x[0] for x in revision_processed_clean]
+            statement_all = list(filter(None, statement_all))
             revisionDf = pd.DataFrame(statement_all)
             revisionDf.statementId = revisionDf['statementId'].astype('category')
             revisionDf.revId = revisionDf['revId'].astype('int')
@@ -902,7 +930,9 @@ def file_extractor(file_name):
                         print(stat)
                         # break
 
-            references_all = list(filter(None, revision_processed_clean[1]))
+            references_all = [x[1] for x in revision_processed_clean]
+            # references_all = list(filter(None, revision_processed_clean[1]))
+            references_all = list(filter(None, references_all))
             references_all = list(itertools.chain.from_iterable(references_all))
             # print(references_all)
             revisionDf = pd.DataFrame(references_all)
@@ -940,13 +970,14 @@ def file_extractor(file_name):
                         print(ref)
                         # break
 
-            if all(v is None for v in revision_processed_clean[
-                2]):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
+            if any(v is None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
                 pass
             else:
-                qualifier_all = list(filter(None, revision_processed_clean[2]))
-                qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                qualifier_all = list(filter(None, revision_processed_clean[2]))
+                # qualifier_all = list(filter(None, revision_processed_clean[2]))
+                # qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+                # qualifier_all = list(filter(None, revision_processed_clean[2]))
+                # qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
+                qualifier_all = list(filter(None, qualifier_all))
                 qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
                 revisionDf = pd.DataFrame(qualifier_all)
                 revisionDf.qualId = revisionDf['qualId'].astype('category')
