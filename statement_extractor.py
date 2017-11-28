@@ -609,28 +609,32 @@ def file_extractor(file_name):
                     statement_all = dicto + delStats
                     print('new statement df')
 
-                    try:
-
-                        cur.executemany(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                            statement_all)
+                    for stat in statement_all:
+                        cur.execute("""INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""", stat)
+                        # print(stat)
                         conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in statement_all:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                                    stat)
-                                print(stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
-                                print(stat)
+
+                    # try:
+                    #     conn = get_db_params()
+                    #     cur = conn.cursor()
+                    #     cur.executemany(
+                    #         """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                    #         statement_all)
+                    #     conn.commit()
+                    #     # print('imported')
+                    # except:
+                    #     conn.rollback()
+                    #     for stat in statement_all:
+                    #         try:
+                    #             cur.execute("""INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""", stat)
+                    #             # print(stat)
+                    #             conn.commit()
+                    #         except:
+                    #             conn.rollback()
+                    #             e = sys.exc_info()[0]
+                    #             print("<p>Error: %s</p>" % e)
+                    #             print('not imported')
+                    #             print(stat)
                                 # break
                         # break
 
