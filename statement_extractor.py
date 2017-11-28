@@ -191,7 +191,7 @@ def getDeleted(dfStat, dfRev):
             statproperty = statproperty[0]
             stattype = dfStat['statType'].unique()
             stattype = stattype[0]
-            dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty': statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
+            # dictDel = {'itemId': itemId, 'revId': revList[position+1], 'statementId': statementId, 'statProperty': statproperty, 'statRank': 'normal', 'statType': stattype, 'statValue': 'deleted'}
             dictDel = {'revId': revList[position + 1], 'statementId': statementId, 'itemId': itemId,
                        'statType': stattype, 'statValue': 'deleted', 'statProperty': statproperty, 'statRank': 'normal'}
             # print('deleted')
@@ -631,7 +631,7 @@ def file_extractor(file_name):
                                 print("<p>Error: %s</p>" % e)
                                 print('not imported')
                                 print(stat)
-                                break
+                                # break
                         # break
 
                     references_all = [x[1] for x in revision_processed_clean]
