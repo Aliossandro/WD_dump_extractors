@@ -548,11 +548,9 @@ def file_extractor(file_name):
 
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
-            if (counter % 50) == 0:
-                print(counter)
 
-            elif counter >= 5000:
-                print('5000 items')
+            if counter >= 1000:
+                print('1000 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
