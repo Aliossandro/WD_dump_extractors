@@ -551,8 +551,8 @@ def file_extractor(file_name):
             if (counter % 50) == 0:
                 print(counter)
 
-            elif counter >= 1000:
-                print('1000 items')
+            elif counter >= 5000:
+                print('5000 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
