@@ -549,7 +549,7 @@ def file_extractor(file_name):
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
 
-            if counter >= 1000:
+            `if counter >= 1000:
                 print('1000 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
@@ -648,6 +648,8 @@ def file_extractor(file_name):
 
                     delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
                     delStats = list(filter(None, list(delStats)))
+                    for x in delStats:
+                        x['revId'] = int(x['revId'])
                     print('deleted refs added')
                     references_all = dicto + delStats
                     print('new statement df refs')
@@ -691,6 +693,8 @@ def file_extractor(file_name):
 
                         delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                         delStats = list(filter(None, list(delStats)))
+                        for x in delStats:
+                            x['revId'] = int(x['revId'])
                         print('deleted quals added')
                         qualifier_all = dicto + delStats
                         print('new statement df quals')
@@ -883,6 +887,8 @@ def file_extractor(file_name):
 
             delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
             delStats = list(filter(None, list(delStats)))
+            for x in delStats:
+                x['revId'] = int(x['revId'])
             print('deleted statements added')
             statement_all = dicto + delStats
             print('new statement df')
@@ -944,6 +950,8 @@ def file_extractor(file_name):
 
             delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
             delStats = list(filter(None, list(delStats)))
+            for x in delStats:
+                x['revId'] = int(x['revId'])
             print('deleted refs added')
             references_all = dicto + delStats
             print('new statement df refs')
@@ -988,6 +996,8 @@ def file_extractor(file_name):
 
                 delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                 delStats = list(filter(None, list(delStats)))
+                for x in delStats:
+                    x['revId'] = int(x['revId'])
                 print('deleted quals added')
                 qualifier_all = dicto + delStats
                 print('new statement df quals')
