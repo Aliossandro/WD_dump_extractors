@@ -596,19 +596,20 @@ def file_extractor(file_name):
                     # statement_all = list(filter(None, revision_processed_clean[0]))
                     # statement_all = [x[0] for x in revision_processed_clean]
                     statement_all = list(filter(None, revision_processed_clean))
+                    print(statement_all)
                     revisionDf = pd.DataFrame(statement_all)
                     revisionDf.statementId = revisionDf['statementId'].astype('category')
                     revisionDf.revId = revisionDf['revId'].astype('int')
                     revisionDf.itemId = revisionDf['itemId'].astype('category')
                     uniStats = get_max_rows(revisionDf)
                     dicto = uniStats.to_dict('records')
-                    print('duplicates removed')
+                    # print('duplicates removed')
 
                     delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
                     delStats = list(filter(None, list(delStats)))
                     for x in delStats:
                         x['revId'] = int(x['revId'])
-                    print('deleted statements added')
+                    # print('deleted statements added')
                     statement_all = dicto + delStats
                     print('new statement df')
 
@@ -630,11 +631,11 @@ def file_extractor(file_name):
                                 conn.commit()
                             except:
                                 conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
+                                # e = sys.exc_info()[0]
+                                # print("<p>Error: %s</p>" % e)
+                                # print('not imported')
                                 #print(stat)
-                                #logger.exception(stat)
+                                logger.exception(stat)
                                 # break
                         # break
 
@@ -892,20 +893,19 @@ def file_extractor(file_name):
             # statement_all = list(filter(None, revision_processed_clean[0]))
             # statement_all = [x[0] for x in revision_processed_clean]
             statement_all = list(filter(None, revision_processed_clean))
-            print(statement_all)
             revisionDf = pd.DataFrame(statement_all)
             revisionDf.statementId = revisionDf['statementId'].astype('category')
             revisionDf.revId = revisionDf['revId'].astype('int')
             revisionDf.itemId = revisionDf['itemId'].astype('category')
             uniStats = get_max_rows(revisionDf)
             dicto = uniStats.to_dict('records')
-            print('duplicates removed')
+            # print('duplicates removed')
 
             delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
             delStats = list(filter(None, list(delStats)))
             for x in delStats:
                 x['revId'] = int(x['revId'])
-            print('deleted statements added')
+            # print('deleted statements added')
             statement_all = dicto + delStats
             print('new statement df')
 
@@ -925,9 +925,9 @@ def file_extractor(file_name):
                         conn.commit()
                     except:
                         conn.rollback()
-                        e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported')
+                        # e = sys.exc_info()[0]
+                        # print("<p>Error: %s</p>" % e)
+                        # print('not imported')
                         # logging.exception(stat)
                         logger.exception(stat)
                         #print(stat)
