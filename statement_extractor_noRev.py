@@ -533,8 +533,7 @@ def extr_rev_data(revision, revId):
 
 ###extract file
 def file_extractor(file_name):
-    logging.basicConfig(filename='./errors.log', level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s %(name)s %(message)s')
+    logging.basicConfig(filename='./errors.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
     logger = logging.getLogger(__name__)
     create_table()
     revision_processed = []
@@ -634,7 +633,8 @@ def file_extractor(file_name):
                                 e = sys.exc_info()[0]
                                 print("<p>Error: %s</p>" % e)
                                 print('not imported')
-                                print(stat)
+                                #print(stat)
+                                logger.exception(stat)
                                 # break
                         # break
 
@@ -678,7 +678,8 @@ def file_extractor(file_name):
                                 e = sys.exc_info()[0]
                                 print("<p>Error: %s</p>" % e)
                                 print('not imported')
-                                print(ref)
+                                # print(ref)
+                                logger.exception(ref)
                                 # break
 
                         # break
@@ -722,7 +723,8 @@ def file_extractor(file_name):
                                     e = sys.exc_info()[0]
                                     print("<p>Error: %s</p>" % e)
                                     print('not imported')
-                                    print(qual)
+                                    # print(qual)
+                                    logger.exception(qual)
                                     # break
 
                             # print(qualifier_all)
@@ -911,28 +913,6 @@ def file_extractor(file_name):
                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                     statement_all)
                 conn.commit()
-                # print('imported')
-            except:
-                conn.rollback()
-                for stat in statement_all:
-                    try:
-                        cur.execute(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                            stat)
-                        conn.commit()
-                    except:
-                        conn.rollback()
-                        e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported')
-                        # print(stat)
-                        logging.exception(stat)
-
-            try:
-                cur.executemany(
-                    """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                    statement_all)
-                conn.commit()
                 print('imported')
             except:
                 conn.rollback()
@@ -947,7 +927,8 @@ def file_extractor(file_name):
                         e = sys.exc_info()[0]
                         print("<p>Error: %s</p>" % e)
                         print('not imported')
-                        logging.exception(stat)
+                        # logging.exception(stat)
+                        logger.exception(stat)
                         #print(stat)
                         # break
 
@@ -991,7 +972,7 @@ def file_extractor(file_name):
                         print("<p>Error: %s</p>" % e)
                         print('not imported')
                         # print(ref)
-                        logging.exception(ref)
+                        logger.exception(ref)
                         # break
 
             if any(v is None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
@@ -1038,7 +1019,7 @@ def file_extractor(file_name):
                             print("<p>Error: %s</p>" % e)
                             print('not imported')
                             # print(qual)
-                            logging.exception(qual)
+                            logger.exception(qual)
                             # break
                     #     return revision_processed
 
