@@ -471,9 +471,9 @@ def extr_statement(text_wd, itemId, revId):
         # , text_wd['mainsnak']['datavalue']
 
         except ValueError as e:
-            print(text_wd['mainsnak'])
+            #print(text_wd['mainsnak'])
             # print(dictStat['statValue'])
-            # pass
+            pass
 
         except KeyError as e:
             # print(text_wd['mainsnak'])  # , text_wd['mainsnak']
@@ -596,7 +596,6 @@ def file_extractor(file_name):
                     # statement_all = list(filter(None, revision_processed_clean[0]))
                     # statement_all = [x[0] for x in revision_processed_clean]
                     statement_all = list(filter(None, revision_processed_clean))
-                    print(statement_all)
                     revisionDf = pd.DataFrame(statement_all)
                     revisionDf.statementId = revisionDf['statementId'].astype('category')
                     revisionDf.revId = revisionDf['revId'].astype('int')
