@@ -473,7 +473,7 @@ def extr_statement(text_wd, itemId, revId):
         except ValueError as e:
             #print(text_wd['mainsnak'])
             # print(dictStat['statValue'])
-            pass
+            # pass
 
         except KeyError as e:
             # print(text_wd['mainsnak'])  # , text_wd['mainsnak']
@@ -854,7 +854,7 @@ def file_extractor(file_name):
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
         # revision_processed_clean = list(zip(*revision_processed_clean))
-        qualifier_all = [x[2] for x in revision_processed_clean]
+        # qualifier_all = [x[2] for x in revision_processed_clean]
 
         dfRev = pd.DataFrame(revMetadata)
 
