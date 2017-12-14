@@ -616,6 +616,7 @@ def file_extractor(file_name):
                     #
                     # statSave = pd.DataFrame(statement_all)
                     # statSave.to_csv('statementStore.csv', index=False, mode='a')
+                    statement_all = pd.DataFrame(statement_all)
                     statement_all.to_csv('statementStore_new.csv', index=False, mode='a')
                     # try:
                     #     conn = get_db_params()
