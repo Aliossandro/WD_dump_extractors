@@ -155,7 +155,7 @@ def create_table():
 #     return df[df.revId == B_maxes]
 
 def get_max_rows(df):
-    B_maxes = df.groupby(['statValue']).revId.transform(min) == df['revId']
+    B_maxes = df.groupby(['statProperty' , 'statValue']).revId.transform(min) == df['revId']
     return df[B_maxes]
 
 def get_max_rowsQual(df):

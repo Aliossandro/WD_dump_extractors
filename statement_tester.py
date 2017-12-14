@@ -155,7 +155,7 @@ def create_table():
 #     return df[df.revId == B_maxes]
 
 def get_max_rows(df):
-    B_maxes = df.groupby(['statValue']).revId.transform(min) == df['revId']
+    B_maxes = df.groupby(['statProperty' ,'statValue']).revId.transform(min) == df['revId']
     return df[B_maxes]
 
 def get_max_rowsQual(df):
@@ -595,7 +595,7 @@ def file_extractor(file_name):
                     statement_all = [x[0] for x in revision_processed_clean]
                     statement_all = list(filter(None, statement_all))
                     revisionDf = pd.DataFrame(statement_all)
-                    
+
                     # revisionDf.statementId = revisionDf['statementId'].astype('category')
                     # revisionDf.revId = revisionDf['revId'].astype('int')
                     # revisionDf.itemId = revisionDf['itemId'].astype('category')
