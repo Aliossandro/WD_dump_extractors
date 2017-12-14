@@ -473,7 +473,7 @@ def extr_statement(text_wd, itemId, revId):
         except ValueError as e:
             #print(text_wd['mainsnak'])
             # print(dictStat['statValue'])
-            # pass
+            pass
 
         except KeyError as e:
             # print(text_wd['mainsnak'])  # , text_wd['mainsnak']
