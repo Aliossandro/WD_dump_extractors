@@ -571,28 +571,28 @@ def file_extractor(file_name):
                     # statement_all = list(filter(None, statement_all))
                     #`
 
-                    conn = get_db_params()
-                    cur = conn.cursor()
-                    try:
-                        cur.executemany(
-                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            revMetadata)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in revMetadata:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported, revision id error')
-                                print(stat)
+                    # conn = get_db_params()
+                    # cur = conn.cursor()
+                    # try:
+                    #     cur.executemany(
+                    #         """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                    #         revMetadata)
+                    #     conn.commit()
+                    #     # print('imported')
+                    # except:
+                    #     conn.rollback()
+                    #     for stat in revMetadata:
+                    #         try:
+                    #             cur.execute(
+                    #                 """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                    #         stat)
+                    #             conn.commit()
+                    #         except:
+                    #             conn.rollback()
+                    #             e = sys.exc_info()[0]
+                    #             print("<p>Error: %s</p>" % e)
+                    #             print('not imported, revision id error')
+                    #             print(stat)
 
                     # statement_all = list(filter(None, revision_processed_clean[0]))
                     statement_all = [x[0] for x in revision_processed_clean]
@@ -863,28 +863,28 @@ def file_extractor(file_name):
             # statement_all = list(itertools.chain.from_iterable(statement_all))
             # statement_all = list(filter(None, statement_all))
             #
-            conn = get_db_params()
-            cur = conn.cursor()
-            try:
-                cur.executemany(
-                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                    revMetadata)
-                conn.commit()
-                # print('imported')
-            except:
-                conn.rollback()
-                for stat in revMetadata:
-                    try:
-                        cur.execute(
-                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            stat)
-                        conn.commit()
-                    except:
-                        conn.rollback()
-                        e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported, revision id error')
-                        print(stat)
+            # conn = get_db_params()
+            # cur = conn.cursor()
+            # try:
+            #     cur.executemany(
+            #         """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+            #         revMetadata)
+            #     conn.commit()
+            #     # print('imported')
+            # except:
+            #     conn.rollback()
+            #     for stat in revMetadata:
+            #         try:
+            #             cur.execute(
+            #                 """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+            #                 stat)
+            #             conn.commit()
+            #         except:
+            #             conn.rollback()
+            #             e = sys.exc_info()[0]
+            #             print("<p>Error: %s</p>" % e)
+            #             print('not imported, revision id error')
+            #             print(stat)
 
 
             # statement_all = list(filter(None, revision_processed_clean[0]))
@@ -925,7 +925,8 @@ def file_extractor(file_name):
                         e = sys.exc_info()[0]
                         print("<p>Error: %s</p>" % e)
                         print('not imported')
-                        print(stat)
+                        # print(stat)
+                        logging.exception(stat)
 
             try:
                 cur.executemany(
@@ -989,7 +990,8 @@ def file_extractor(file_name):
                         e = sys.exc_info()[0]
                         print("<p>Error: %s</p>" % e)
                         print('not imported')
-                        print(ref)
+                        # print(ref)
+                        logging.exception(ref)
                         # break
 
             if any(v is None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
@@ -1035,7 +1037,8 @@ def file_extractor(file_name):
                             e = sys.exc_info()[0]
                             print("<p>Error: %s</p>" % e)
                             print('not imported')
-                            print(qual)
+                            # print(qual)
+                            logging.exception(qual)
                             # break
                     #     return revision_processed
 
