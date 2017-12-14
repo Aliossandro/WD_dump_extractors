@@ -600,6 +600,9 @@ def file_extractor(file_name):
                     revisionDf.revId = revisionDf['revId'].astype('int')
                     revisionDf.itemId = revisionDf['itemId'].astype('category')
                     uniStats = get_max_rows(revisionDf)
+                    if uniStats['itemId'].unique()[0] == 'Q17649854':
+                        print(uniStats)
+
                     dicto = uniStats.to_dict('records')
                     print('duplicates removed')
 
@@ -613,7 +616,7 @@ def file_extractor(file_name):
                     #
                     # statSave = pd.DataFrame(statement_all)
                     # statSave.to_csv('statementStore.csv', index=False, mode='a')
-                    statement_all.to_csv('statementStore.csv', index=False, mode='a')
+                    statement_all.to_csv('statementStore_new.csv', index=False, mode='a')
                     # try:
                     #     conn = get_db_params()
                     #     cur = conn.cursor()
