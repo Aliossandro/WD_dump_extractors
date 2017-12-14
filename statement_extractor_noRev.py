@@ -552,8 +552,8 @@ def file_extractor(file_name):
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
 
-            if counter >= 250:
-                print('250 items')
+            if counter >= 400:
+                print('400 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
@@ -634,7 +634,7 @@ def file_extractor(file_name):
                                 print("<p>Error: %s</p>" % e)
                                 print('not imported')
                                 #print(stat)
-                                logger.exception(stat)
+                                #logger.exception(stat)
                                 # break
                         # break
 
@@ -892,6 +892,7 @@ def file_extractor(file_name):
             # statement_all = list(filter(None, revision_processed_clean[0]))
             # statement_all = [x[0] for x in revision_processed_clean]
             statement_all = list(filter(None, revision_processed_clean))
+            print(statement_all)
             revisionDf = pd.DataFrame(statement_all)
             revisionDf.statementId = revisionDf['statementId'].astype('category')
             revisionDf.revId = revisionDf['revId'].astype('int')
