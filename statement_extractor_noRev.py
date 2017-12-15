@@ -537,8 +537,12 @@ def file_extractor(file_name):
     logger = logging.getLogger(__name__)
     create_table()
     revision_processed = []
+    statementStore = []
+    # referenceStore = []
+    # qualifierStore = []
     new_counter = 0
     counter = 0
+    procCounter = 0
     # counterImport = 0
     record = False
     revId = None
@@ -610,32 +614,10 @@ def file_extractor(file_name):
                         x['revId'] = int(x['revId'])
                     # print('deleted statements added')
                     statement_all = dicto + delStats
+                    statementStore = statementStore + statement_all
                     print('new statement df')
 
-
-                    try:
-                        conn = get_db_params()
-                        cur = conn.cursor()
-                        cur.executemany(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                            statement_all)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in statement_all:
-                            try:
-                                cur.execute("""INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""", stat)
-                                # print(stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                # e = sys.exc_info()[0]
-                                # print("<p>Error: %s</p>" % e)
-                                # print('not imported')
-                                #print(stat)
-                                logger.exception(stat)
-                                # break
+                               # break
                         # break
 
                     # references_all = [x[1] for x in revision_processed_clean]
@@ -739,14 +721,45 @@ def file_extractor(file_name):
                 statement_all = []
                 dicto =[]
                 uniStats = []
-                references_all = []
-                qualifier_all = []
+                # references_all = []
+                # qualifier_all = []
+                procCounter += 1
                 new_counter += counter
-                print('done!', new_counter)
                 counter = 0
                 dfRev = pd.DataFrame()
                 # break
 
+
+            if procCounter == 40:
+
+                try:
+                    conn = get_db_params()
+                    cur = conn.cursor()
+                    cur.executemany(
+                        """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                        statementStore)
+                    conn.commit()
+                    # print('imported')
+                except:
+                    conn.rollback()
+                    for stat in statementStore:
+                        try:
+                            cur.execute(
+                                """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                                stat)
+                            # print(stat)
+                            conn.commit()
+                        except:
+                            conn.rollback()
+                            # e = sys.exc_info()[0]
+                            # print("<p>Error: %s</p>" % e)
+                            # print('not imported')
+                            # print(stat)
+                            logger.exception(stat)
+
+                statementStore = []
+                procCounter = 0
+                print(new_counter, ' statements imported!')
 
             if '<title>' in line:
                 itemId = line
