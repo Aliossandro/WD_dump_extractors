@@ -540,6 +540,11 @@ def file_extractor(file_name):
     revision_processed = []
     new_counter = 0
     counter = 0
+    revisionStore = []
+    statementStore = []
+    referenceStore = []
+    qualifierStore = []
+    procCounter = 0
     # counterImport = 0
     record = False
     revId = None
@@ -562,6 +567,7 @@ def file_extractor(file_name):
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
                 qualifier_all = [x[2] for x in revision_processed_clean]
                 # revision_processed_clean = list(zip(*revision_processed_clean))
+                revisionStore = revisionStore + revMetadata
 
                 try:
                     # print(statement_all)
@@ -571,28 +577,6 @@ def file_extractor(file_name):
                     # statement_all = list(filter(None, statement_all))
                     #`
 
-                    conn = get_db_params()
-                    cur = conn.cursor()
-                    try:
-                        cur.executemany(
-                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            revMetadata)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in revMetadata:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                            stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported, revision id error')
-                                print(stat)
 
                     # statement_all = list(filter(None, revision_processed_clean[0]))
                     statement_all = [x[0] for x in revision_processed_clean]
@@ -603,39 +587,13 @@ def file_extractor(file_name):
                     revisionDf.itemId = revisionDf['itemId'].astype('category')
                     uniStats = get_max_rows(revisionDf)
                     dicto = uniStats.to_dict('records')
-                    print('duplicates removed')
 
                     delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
                     delStats = list(filter(None, list(delStats)))
                     for x in delStats:
                         x['revId'] = int(x['revId'])
-                    print('deleted statements added')
                     statement_all = dicto + delStats
                     print('new statement df')
-
-
-                    try:
-                        conn = get_db_params()
-                        cur = conn.cursor()
-                        cur.executemany(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                            statement_all)
-                        conn.commit()
-                        # print('imported')
-                    except:
-                        conn.rollback()
-                        for stat in statement_all:
-                            try:
-                                cur.execute("""INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""", stat)
-                                # print(stat)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
-                                print(stat)
-                                # break
                         # break
 
                     references_all = [x[1] for x in revision_processed_clean]
@@ -648,38 +606,15 @@ def file_extractor(file_name):
                     revisionDf.revId = revisionDf['revId'].astype('int')
                     uniStats = get_max_rowsRef(revisionDf)
                     dicto = uniStats.to_dict('records')
-                    print('duplicates removed ref')
 
                     delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
                     delStats = list(filter(None, list(delStats)))
                     for x in delStats:
                         x['revId'] = int(x['revId'])
-                    print('deleted refs added')
                     references_all = dicto + delStats
                     print('new statement df refs')
+                    referenceStore = referenceStore + references_all
 
-                    try:
-
-                        cur.executemany(
-                            """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                            references_all)
-                        conn.commit()
-                        # print('references imported')
-                    except:
-                        conn.rollback()
-                        for ref in references_all:
-                            try:
-                                cur.execute(
-                                    """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                                    ref)
-                                conn.commit()
-                            except:
-                                conn.rollback()
-                                e = sys.exc_info()[0]
-                                print("<p>Error: %s</p>" % e)
-                                print('not imported')
-                                print(ref)
-                                # break
 
                         # break
                     if any(v is not None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
@@ -693,37 +628,16 @@ def file_extractor(file_name):
                         revisionDf.revId = revisionDf['revId'].astype('int')
                         uniStats = get_max_rowsQual(revisionDf)
                         dicto = uniStats.to_dict('records')
-                        print('duplicates removed qual')
 
                         delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
                         delStats = list(filter(None, list(delStats)))
                         for x in delStats:
                             x['revId'] = int(x['revId'])
-                        print('deleted quals added')
                         qualifier_all = dicto + delStats
                         print('new statement df quals')
+                        qualifierStore = qualifierStore + qualifier_all
 
-                        try:
-                            cur.executemany(
-                                """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                qualifier_all)
-                            conn.commit()
-                            # print('qualifiers imported')
-                        except:
-                            conn.rollback()
-                            for qual in qualifier_all:
-                                try:
-                                    cur.execute(
-                                        """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                        qual)
-                                    conn.commit()
-                                except:
-                                    conn.rollback()
-                                    e = sys.exc_info()[0]
-                                    print("<p>Error: %s</p>" % e)
-                                    print('not imported')
-                                    print(qual)
-                                    # break
+
 
                             # print(qualifier_all)
 
@@ -740,11 +654,112 @@ def file_extractor(file_name):
                 references_all = []
                 qualifier_all = []
                 new_counter += counter
-                print('done!', new_counter)
+                procCounter += 1
                 counter = 0
                 dfRev = pd.DataFrame()
                 # break
 
+            if procCounter == 40:
+
+                conn = get_db_params()
+                cur = conn.cursor()
+                try:
+                    cur.executemany(
+                        """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                        revisionStore)
+                    conn.commit()
+                    # print('imported')
+                except:
+                    conn.rollback()
+                    for stat in revisionStore:
+                        try:
+                            cur.execute(
+                                """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                                stat)
+                            conn.commit()
+                        except:
+                            conn.rollback()
+                            e = sys.exc_info()[0]
+                            print("<p>Error: %s</p>" % e)
+                            print('not imported, revision id error')
+                            print(stat)
+
+                try:
+                    # conn = get_db_params()
+                    # cur = conn.cursor()
+                    cur.executemany(
+                        """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                        statementStore)
+                    conn.commit()
+                    # print('imported')
+                except:
+                    conn.rollback()
+                    for stat in statementStore:
+                        try:
+                            cur.execute(
+                                """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                                stat)
+                            # print(stat)
+                            conn.commit()
+                        except:
+                            conn.rollback()
+                            # e = sys.exc_info()[0]
+                            # print("<p>Error: %s</p>" % e)
+                            # print('not imported')
+                            # print(stat)
+                            logger.exception(stat)
+
+                try:
+
+                    cur.executemany(
+                        """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                        referenceStore)
+                    conn.commit()
+                    # print('references imported')
+                except:
+                    conn.rollback()
+                    for ref in referenceStore:
+                        try:
+                            cur.execute(
+                                """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                                ref)
+                            conn.commit()
+                        except:
+                            conn.rollback()
+                            e = sys.exc_info()[0]
+                            print("<p>Error: %s</p>" % e)
+                            print('not imported')
+                            print(ref)
+                            # break
+
+                try:
+                    cur.executemany(
+                        """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                        qualifierStore)
+                    conn.commit()
+                    # print('qualifiers imported')
+                except:
+                    conn.rollback()
+                    for qual in qualifierStore:
+                        try:
+                            cur.execute(
+                                """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                                qual)
+                            conn.commit()
+                        except:
+                            conn.rollback()
+                            e = sys.exc_info()[0]
+                            print("<p>Error: %s</p>" % e)
+                            print('not imported')
+                            print(qual)
+                            # break
+
+                revisionStore = []
+                statementStore = []
+                referenceStore =[]
+                qualifierStore = []
+                procCounter = 0
+                print(new_counter, ' statements imported!')
 
             if '<title>' in line:
                 itemId = line
