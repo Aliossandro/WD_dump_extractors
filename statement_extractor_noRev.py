@@ -922,6 +922,8 @@ def file_extractor(file_name):
             print('new statement df')
 
             try:
+                conn = get_db_params()
+                cur = conn.cursor()
                 cur.executemany(
                     """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                     statement_all)
