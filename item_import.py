@@ -223,15 +223,15 @@ def file_extractor(file_name):
                         cur = conn.cursor()
                         cur.executemany("""INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(item_id)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""",revision_processed)
                         conn.commit()
-                        print 'imported'
+                        # print 'imported'
                     except :
                         conn.rollback()
-                        print 'not imported'
-                        print revision_clean
+                        # print 'not imported'
+                        # print revision_clean
 
                     revision_processed = []
                     counter = 0
-                    print 'done!'
+                    # print 'done!'
                     # break
 
                 continue
@@ -245,15 +245,15 @@ def file_extractor(file_name):
             cur.executemany(
                 """INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(item_id)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""", revision_processed)
             conn.commit()
-            print 'imported'
+            # print 'imported'
         except:
             conn.rollback()
-            print 'not imported'
-            print revision_clean
+            # print 'not imported'
+            # print revision_clean
 
         revision_processed = []
         counter = 0
-        print 'file exported!'
+        print file_name + 'exported!'
 
 
 
