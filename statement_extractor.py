@@ -593,6 +593,7 @@ def file_extractor(file_name):
                     for x in delStats:
                         x['revId'] = int(x['revId'])
                     statement_all = dicto + delStats
+                    statementStore = statementStore + statement_all
                     print('new statement df')
                         # break
 
