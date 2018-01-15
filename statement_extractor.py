@@ -50,7 +50,7 @@ def get_db_params():
 def create_table():
     ###statement table query
     query_table_1 = """
-    		CREATE TABLE IF NOT EXISTS revisionData_20171001 (    		    
+    		CREATE TABLE IF NOT EXISTS revisionData_201710 (    		    
     			itemId VARCHAR(255),
     			revId VARCHAR(255) PRIMARY KEY,
     			parId VARCHAR(255),
@@ -61,7 +61,7 @@ def create_table():
 
     ###statement table query
     query_table_2 = """
-		CREATE TABLE IF NOT EXISTS statementsData_20171001 (
+		CREATE TABLE IF NOT EXISTS statementsData_201710 (
 		    itemId VARCHAR(255),
 		    revId VARCHAR(255),
 			statementId VARCHAR(255),
@@ -74,7 +74,7 @@ def create_table():
 		"""
     ###reference table query
     query_table_3 = """
-		CREATE TABLE IF NOT EXISTS referenceData_20171001 (
+		CREATE TABLE IF NOT EXISTS referenceData_201710 (
 		    serialId SERIAL,
 		    revId VARCHAR(255),
 			statementId VARCHAR(255),
@@ -87,7 +87,7 @@ def create_table():
 		"""
     ###qualifier table query
     query_table_4 = """
-		CREATE TABLE IF NOT EXISTS qualifierData_20171001 (
+		CREATE TABLE IF NOT EXISTS qualifierData_201710 (
 		    serialId SERIAL,
 		    revId VARCHAR(255),
 			statementId VARCHAR(255),
@@ -666,7 +666,7 @@ def file_extractor(file_name):
                 cur = conn.cursor()
                 try:
                     cur.executemany(
-                        """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                        """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                         revisionStore)
                     conn.commit()
                     # print('imported')
@@ -675,7 +675,7 @@ def file_extractor(file_name):
                     for stat in revisionStore:
                         try:
                             cur.execute(
-                                """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                                """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                                 stat)
                             conn.commit()
                         except:
@@ -689,7 +689,7 @@ def file_extractor(file_name):
                     # conn = get_db_params()
                     # cur = conn.cursor()
                     cur.executemany(
-                        """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                        """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                         statementStore)
                     conn.commit()
                     # print('imported')
@@ -698,7 +698,7 @@ def file_extractor(file_name):
                     for stat in statementStore:
                         try:
                             cur.execute(
-                                """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                                """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                                 stat)
                             # print(stat)
                             conn.commit()
@@ -713,7 +713,7 @@ def file_extractor(file_name):
                 try:
 
                     cur.executemany(
-                        """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                        """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
                         referenceStore)
                     conn.commit()
                     # print('references imported')
@@ -722,7 +722,7 @@ def file_extractor(file_name):
                     for ref in referenceStore:
                         try:
                             cur.execute(
-                                """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                                """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
                                 ref)
                             conn.commit()
                         except:
@@ -735,7 +735,7 @@ def file_extractor(file_name):
 
                 try:
                     cur.executemany(
-                        """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                        """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
                         qualifierStore)
                     conn.commit()
                     # print('qualifiers imported')
@@ -744,7 +744,7 @@ def file_extractor(file_name):
                     for qual in qualifierStore:
                         try:
                             cur.execute(
-                                """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                                """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
                                 qual)
                             conn.commit()
                         except:
@@ -883,7 +883,7 @@ def file_extractor(file_name):
             cur = conn.cursor()
             try:
                 cur.executemany(
-                    """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                    """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                     revMetadata)
                 conn.commit()
                 # print('imported')
@@ -892,7 +892,7 @@ def file_extractor(file_name):
                 for stat in revMetadata:
                     try:
                         cur.execute(
-                            """INSERT INTO revisionData_20171001 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
+                            """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                             stat)
                         conn.commit()
                     except:
@@ -927,7 +927,7 @@ def file_extractor(file_name):
                 conn = get_db_params()
                 cur = conn.cursor()
                 cur.executemany(
-                    """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                    """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                     statement_all)
                 conn.commit()
                 print('imported')
@@ -936,7 +936,7 @@ def file_extractor(file_name):
                 for stat in statement_all:
                     try:
                         cur.execute(
-                            """INSERT INTO statementsData_20171001 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
+                            """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                             stat)
                         conn.commit()
                     except:
@@ -970,7 +970,7 @@ def file_extractor(file_name):
 
             try:
                 cur.executemany(
-                    """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                    """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
                     references_all)
                 conn.commit()
                 print('imported')
@@ -979,7 +979,7 @@ def file_extractor(file_name):
                 for ref in references_all:
                     try:
                         cur.execute(
-                            """INSERT INTO referenceData_20171001 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
+                            """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
                             ref)
                         conn.commit()
                     except:
@@ -1016,7 +1016,7 @@ def file_extractor(file_name):
 
                 try:
                     cur.executemany(
-                        """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                        """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
                         qualifier_all)
                     conn.commit()
                     print('imported')
@@ -1025,7 +1025,7 @@ def file_extractor(file_name):
                     for qual in qualifier_all:
                         try:
                             cur.execute(
-                                """INSERT INTO qualifierData_20171001 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
+                                """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
                                 qual)
                             conn.commit()
                         except:
