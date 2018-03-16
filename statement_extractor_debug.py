@@ -31,7 +31,7 @@ import logging
 # import rapidjson
 
 # file_name = '/Users/alessandro/Documents/PhD/WD_import_new/wikidatawiki-20170601-pages-meta-current3.xml-p10305527p11805527.bz2'
-# file_name = '/Users/alessandro/Documents/PhD/q5.txt'
+# file_name = '/Users/alessandro/Documents/PhD/wikidatawiki-20171001-pages-meta-history1.xml-p1p4590.bz2'
 
 
 # connection parameters
@@ -118,43 +118,6 @@ def create_table():
         if conn is not None:
             conn.close()
 
-#Delete duplicates
-
-# def cleanDuplicates():
-#
-#     statementQuery = """
-#     DELETE FROM statementsData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, statProperty, statValue ORDER BY revId ) AS row_num FROM statementsData_20171001 ) t WHERE t.row_num > 1 )
-#     """
-#
-#     referenceQuery = """
-#     DELETE FROM referenceData_20171001 WHERE revId IN ( SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY referenceId, statementId, refProperty, refValue ORDER BY revId ) AS row_num FROM referenceData_20171001 ) t WHERE t.row_num > 1 )
-#     """
-#
-#     qualifierQuery = """
-#     DELETE FROM qualifierData_20171001 WHERE revId IN (SELECT revId FROM (SELECT revId, ROW_NUMBER() OVER( PARTITION BY statementId, qualifierId, qualProperty, qualValue ORDER BY revId ) AS row_num FROM qualifierData_20171001 ) t WHERE t.row_num > 1 )
-#     """
-#     query_list = [statementQuery, referenceQuery, qualifierQuery]
-#     conn = None
-#
-#
-#     conn = get_db_params()
-#     cur = conn.cursor()
-#
-#     for query in query_list:
-#         try:
-#             cur.execute(query)
-#         except (Exception, psycopg2.DatabaseError) as error:
-#             print(error)
-#
-#     cur.close()
-#     conn.commit()
-#
-#     if conn is not None:
-#         conn.close()
-
-# def get_max_rows(df):
-#     B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min)
-#     return df[df.revId == B_maxes]
 
 def get_max_rows(df):
     B_maxes = df.groupby(['statementId', 'statValue']).revId.transform(min) == df['revId']
@@ -483,33 +446,11 @@ def extr_statement(text_wd, itemId, revId):
     else:
         dictStat['statType'] = text_wd['mainsnak']['snaktype']
         dictStat['statValue'] = text_wd['mainsnak']['snaktype']
-        # print(text_wd['mainsnak']['snaktype'])
 
-    if 'references' in text_wd:
-        for idx, ref in enumerate(text_wd['references']):
-            refId = dictStat['statementId'] + '-' + str(idx)
-            ref_data = ref_loop(ref, refId, dictStat['statementId'], revId)
-
-    else:
-        ref_data = None
-
-    if 'qualifiers' in text_wd:
-        qual_data = []
-        for key in text_wd['qualifiers']:
-            # print(text_wd['qualifiers'][key])
-            qual_single = [qual_extractor(el, text_wd['id'], idx, revId) for idx, el in enumerate(text_wd['qualifiers'][key])]
-            qual_data += qual_single
-
-            # qual_data = list(itertools.chain.from_iterable(qualifier_list))
-
-    else:
-        qual_data = None
-
-    # print(dictStat)
-    return dictStat, ref_data, qual_data
+    return dictStat
 
 
-#     return dictStat
+
 
 
 def extr_rev_data(revision, revId):
@@ -534,10 +475,10 @@ def extr_rev_data(revision, revId):
 
 ###extract file
 def file_extractor(file_name):
-    logging.basicConfig(filename='./errors.log', level=logging.DEBUG,
+    logging.basicConfig(filename='./errors_new.log', level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s %(message)s')
     logger = logging.getLogger(__name__)
-    create_table()
+    # create_table()
     revision_processed = []
     new_counter = 0
     counter = 0
@@ -559,28 +500,21 @@ def file_extractor(file_name):
     with bz2.open(file_name, 'rt') as inputfile:
         for line in inputfile:
 
-            if counter >= 350:
-                print('350 items')
+            if counter >= 100:
+                print('150 items')
                 # counterImport += 1
                 dfRev = pd.DataFrame(revMetadata)
 
+                # print(revision_processed)
                 revision_processed = list(filter(None, revision_processed))
                 revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
-                qualifier_all = [x[2] for x in revision_processed_clean]
+                # qualifier_all = [x[2] for x in revision_processed_clean]
                 # revision_processed_clean = list(zip(*revision_processed_clean))
-                revisionStore = revisionStore + revMetadata
+                revisionStore += revMetadata
 
                 try:
-                    # print(statement_all)
 
-                    # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
-                    # statement_all = list(itertools.chain.from_iterable(statement_all))
-                    # statement_all = list(filter(None, statement_all))
-                    #`
-
-
-                    # statement_all = list(filter(None, revision_processed_clean[0]))
-                    statement_all = [x[0] for x in revision_processed_clean]
+                    statement_all = revision_processed_clean
                     statement_all = list(filter(None, statement_all))
                     revisionDf = pd.DataFrame(statement_all)
                     revisionDf.statementId = revisionDf['statementId'].astype('category')
@@ -594,57 +528,13 @@ def file_extractor(file_name):
                     for x in delStats:
                         x['revId'] = int(x['revId'])
                     statement_all = dicto + delStats
-                    statementStore = statementStore + statement_all
-                    print('new statement df')
-                        # break
+                    statementStore += statement_all
 
-                    references_all = [x[1] for x in revision_processed_clean]
-                    # references_all = list(filter(None, revision_processed_clean[1]))
-                    references_all = list(filter(None, references_all))
-                    references_all = list(itertools.chain.from_iterable(references_all))
-                    # print(references_all)
-                    revisionDf = pd.DataFrame(references_all)
-                    revisionDf.referenceId = revisionDf['referenceId'].astype('category')
-                    revisionDf.revId = revisionDf['revId'].astype('int')
-                    uniStats = get_max_rowsRef(revisionDf)
-                    dicto = uniStats.to_dict('records')
-
-                    delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
-                    delStats = list(filter(None, list(delStats)))
-                    for x in delStats:
-                        x['revId'] = int(x['revId'])
-                    references_all = dicto + delStats
-                    print('new statement df refs')
-                    referenceStore = referenceStore + references_all
-
-
-                        # break
-                    if any(v is not None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
-                    #     pass
-                    # else:
-
-                        qualifier_all = list(filter(None, qualifier_all))
-                        qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                        revisionDf = pd.DataFrame(qualifier_all)
-                        revisionDf.qualId = revisionDf['qualId'].astype('category')
-                        revisionDf.revId = revisionDf['revId'].astype('int')
-                        uniStats = get_max_rowsQual(revisionDf)
-                        dicto = uniStats.to_dict('records')
-
-                        delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
-                        delStats = list(filter(None, list(delStats)))
-                        for x in delStats:
-                            x['revId'] = int(x['revId'])
-                        qualifier_all = dicto + delStats
-                        print('new statement df quals')
-                        qualifierStore = qualifierStore + qualifier_all
-
-
-
-                            # print(qualifier_all)
 
                 except IndexError as ie:
                     print(ie, revision_processed_clean)
+                    #logger.exception(revision_processed_clean)
+
                     # break
 
                 revision_processed = []
@@ -661,7 +551,13 @@ def file_extractor(file_name):
                 dfRev = pd.DataFrame()
                 # break
 
-            if procCounter == 40:
+            if procCounter == 10:
+
+                cosi = pd.DataFrame(revisionStore)
+                cosi.to_csv("revisions.csv", mode="a", index=False)
+
+                cosistat = pd.DataFrame(statementStore)
+                cosistat.to_csv("statements.csv", mode="a", index=False)
 
                 conn = get_db_params()
                 cur = conn.cursor()
@@ -670,7 +566,7 @@ def file_extractor(file_name):
                         """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
                         revisionStore)
                     conn.commit()
-                    # print('imported')
+                    print('revisions imported')
                 except:
                     conn.rollback()
                     for stat in revisionStore:
@@ -681,10 +577,11 @@ def file_extractor(file_name):
                             conn.commit()
                         except:
                             conn.rollback()
-                            e = sys.exc_info()[0]
-                            print("<p>Error: %s</p>" % e)
-                            print('not imported, revision id error')
-                            print(stat)
+                            # e = sys.exc_info()[0]
+                            # print("<p>Error: %s</p>" % e)
+                            # print('not imported, revision id error')
+                            # print(stat)
+                            logger.exception(stat)
 
                 try:
                     # conn = get_db_params()
@@ -693,7 +590,7 @@ def file_extractor(file_name):
                         """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
                         statementStore)
                     conn.commit()
-                    # print('imported')
+                    print('statements imported')
                 except:
                     conn.rollback()
                     for stat in statementStore:
@@ -705,61 +602,13 @@ def file_extractor(file_name):
                             conn.commit()
                         except:
                             conn.rollback()
-                            # e = sys.exc_info()[0]
-                            # print("<p>Error: %s</p>" % e)
-                            # print('not imported')
-                            # print(stat)
                             logger.exception(stat)
 
-                try:
-
-                    cur.executemany(
-                        """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                        referenceStore)
-                    conn.commit()
-                    # print('references imported')
-                except:
-                    conn.rollback()
-                    for ref in referenceStore:
-                        try:
-                            cur.execute(
-                                """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                                ref)
-                            conn.commit()
-                        except:
-                            conn.rollback()
-                            e = sys.exc_info()[0]
-                            print("<p>Error: %s</p>" % e)
-                            print('not imported')
-                            print(ref)
-                            # break
-
-                try:
-                    cur.executemany(
-                        """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                        qualifierStore)
-                    conn.commit()
-                    # print('qualifiers imported')
-                except:
-                    conn.rollback()
-                    for qual in qualifierStore:
-                        try:
-                            cur.execute(
-                                """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                qual)
-                            conn.commit()
-                        except:
-                            conn.rollback()
-                            e = sys.exc_info()[0]
-                            print("<p>Error: %s</p>" % e)
-                            print('not imported')
-                            print(qual)
-                            # break
 
                 revisionStore = []
                 statementStore = []
-                referenceStore =[]
-                qualifierStore = []
+                # referenceStore =[]
+                # qualifierStore = []
                 procCounter = 0
                 print(new_counter, ' statements imported!')
 
@@ -869,11 +718,16 @@ def file_extractor(file_name):
         revision_processed = list(filter(None, revision_processed))
         revision_processed_clean = list(itertools.chain.from_iterable(revision_processed))
         # revision_processed_clean = list(zip(*revision_processed_clean))
-        qualifier_all = [x[2] for x in revision_processed_clean]
+        # qualifier_all = [x[2] for x in revision_processed_clean]
 
         dfRev = pd.DataFrame(revMetadata)
 
         try:
+            revisionStore += revMetadata
+            cosi = pd.DataFrame(revisionStore)
+            cosi.to_csv("revisions.csv", mode="a", index=False)
+
+
             # print(statement_all)
 
             # statement_all = list(itertools.chain.from_iterable(revision_processed_clean[0]))
@@ -885,12 +739,12 @@ def file_extractor(file_name):
             try:
                 cur.executemany(
                     """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
-                    revMetadata)
+                    revisionStore)
                 conn.commit()
-                # print('imported')
+                print('revision final imported')
             except:
                 conn.rollback()
-                for stat in revMetadata:
+                for stat in revisionStore:
                     try:
                         cur.execute(
                             """INSERT INTO revisionData_201710 (itemId, parId, revId, timeStamp, userName) VALUES (%(itemId)s, %(parId)s, %(revId)s, %(timeStamp)s, %(userName)s);""",
@@ -899,13 +753,15 @@ def file_extractor(file_name):
                     except:
                         conn.rollback()
                         e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported, revision id error')
-                        print(stat)
+                        # print("<p>Error: %s</p>" % e)
+                        # print('not imported, revision id error')
+                        # print(stat)
+                        logger.exception(stat)
 
 
             # statement_all = list(filter(None, revision_processed_clean[0]))
-            statement_all = [x[0] for x in revision_processed_clean]
+            # statement_all = [x[0] for x in revision_processed_clean]
+            statement_all = revision_processed_clean
             statement_all = list(filter(None, statement_all))
             revisionDf = pd.DataFrame(statement_all)
             revisionDf.statementId = revisionDf['statementId'].astype('category')
@@ -913,29 +769,33 @@ def file_extractor(file_name):
             revisionDf.itemId = revisionDf['itemId'].astype('category')
             uniStats = get_max_rows(revisionDf)
             dicto = uniStats.to_dict('records')
-            print('duplicates removed')
+            # print('duplicates removed')
 
             delStats = revisionDf.groupby('statementId').apply(getDeleted, dfRev)
             delStats = list(filter(None, list(delStats)))
             for x in delStats:
                 x['revId'] = int(x['revId'])
-            print('deleted statements added')
+            # print('deleted statements added')
             statement_all = dicto + delStats
-            print('new statement df')
-            conn = get_db_params()
-            cur = conn.cursor()
+            statementStore += statement_all
+            print('final statement df')
+
+            cosistat = pd.DataFrame(statementStore)
+            cosistat.to_csv("statements.csv", mode="a", index=False)
+            # conn = get_db_params()
+            # cur = conn.cursor()
 
 
             try:
 
                 cur.executemany(
                     """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
-                    statement_all)
+                    statementStore)
                 conn.commit()
                 print('imported')
             except:
                 conn.rollback()
-                for stat in statement_all:
+                for stat in statementStore:
                     try:
                         cur.execute(
                             """INSERT INTO statementsData_201710 (itemId, revId, statementId, statProperty, statRank, statType, statValue) VALUES (%(itemId)s, %(revId)s, %(statementId)s, %(statProperty)s, %(statRank)s, %(statType)s, %(statValue)s);""",
@@ -944,104 +804,15 @@ def file_extractor(file_name):
                     except:
                         conn.rollback()
                         e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported')
+                        # print("<p>Error: %s</p>" % e)
+                        # print('not imported')
                         logging.exception(stat)
-                        #print(stat)
-                        # break
 
-            references_all = [x[1] for x in revision_processed_clean]
-            # references_all = list(filter(None, revision_processed_clean[1]))
-            references_all = list(filter(None, references_all))
-            references_all = list(itertools.chain.from_iterable(references_all))
-            # print(references_all)
-            revisionDf = pd.DataFrame(references_all)
-            revisionDf.referenceId = revisionDf['referenceId'].astype('category')
-            revisionDf.revId = revisionDf['revId'].astype('int')
-            uniStats = get_max_rowsRef(revisionDf)
-            dicto = uniStats.to_dict('records')
-            print('duplicates removed ref')
-
-            delStats = revisionDf.groupby('referenceId').apply(getDeletedRef, dfRev)
-            delStats = list(filter(None, list(delStats)))
-            for x in delStats:
-                x['revId'] = int(x['revId'])
-            print('deleted refs added')
-            references_all = dicto + delStats
-            print('new statement df refs')
-
-            try:
-                cur.executemany(
-                    """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                    references_all)
-                conn.commit()
-                print('imported')
-            except:
-                conn.rollback()
-                for ref in references_all:
-                    try:
-                        cur.execute(
-                            """INSERT INTO referenceData_201710 (referenceId, refProperty, refType, refValue, revId, statementId) VALUES (%(referenceId)s, %(refProperty)s, %(refType)s, %(refValue)s, %(revId)s, %(statementId)s);""",
-                            ref)
-                        conn.commit()
-                    except:
-                        conn.rollback()
-                        e = sys.exc_info()[0]
-                        print("<p>Error: %s</p>" % e)
-                        print('not imported')
-                        print(ref)
-                        # break
-
-            if any(v is None for v in qualifier_all):  # revision_processed_clean[2].count(None) == len(revision_processed_clean[2]):
-                pass
-            else:
-                # qualifier_all = list(filter(None, revision_processed_clean[2]))
-                # qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                # qualifier_all = list(filter(None, revision_processed_clean[2]))
-                # qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                qualifier_all = list(filter(None, qualifier_all))
-                qualifier_all = list(itertools.chain.from_iterable(qualifier_all))
-                revisionDf = pd.DataFrame(qualifier_all)
-                revisionDf.qualId = revisionDf['qualId'].astype('category')
-                revisionDf.revId = revisionDf['revId'].astype('int')
-                uniStats = get_max_rowsQual(revisionDf)
-                dicto = uniStats.to_dict('records')
-                print('duplicates removed qual')
-
-                delStats = revisionDf.groupby('qualId').apply(getDeletedQual, dfRev)
-                delStats = list(filter(None, list(delStats)))
-                for x in delStats:
-                    x['revId'] = int(x['revId'])
-                print('deleted quals added')
-                qualifier_all = dicto + delStats
-                print('new statement df quals')
-
-                try:
-                    cur.executemany(
-                        """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                        qualifier_all)
-                    conn.commit()
-                    print('imported')
-                except:
-                    conn.rollback()
-                    for qual in qualifier_all:
-                        try:
-                            cur.execute(
-                                """INSERT INTO qualifierData_201710 (qualifierId, qualProperty, qualType, qualValue, revId, statementId) VALUES (%(qualId)s, %(qualProperty)s, %(qualType)s, %(qualValue)s, %(revId)s, %(statementId)s);""",
-                                qual)
-                            conn.commit()
-                        except:
-                            conn.rollback()
-                            e = sys.exc_info()[0]
-                            print("<p>Error: %s</p>" % e)
-                            print('not imported')
-                            print(qual)
-                            # break
-                    #     return revision_processed
 
 
         except IndexError as ie:
-            print(ie, revision_processed_clean)
+            #print(ie, revision_processed_clean)
+            logger.exception(revision_processed_clean)
             # break
 
         revision_processed = []
