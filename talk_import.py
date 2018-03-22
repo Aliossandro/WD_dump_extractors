@@ -212,8 +212,7 @@ def file_extractor(file_name):
                     del revision_clean[5:7]
 
                 if '<ns>0</ns>' not in ns:
-                    print ns
-                    print pageTitle
+                    
                     revision_clean = map(list_cleaner, revision_clean)
                     try:
                         # revision_clean[5] = ujson.loads(revision_clean[5])
