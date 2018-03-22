@@ -44,7 +44,7 @@ def process_buffer(buf):
 
 
 
-def extr_rev_data(rev_id, parent_id, time, user, comment, revision):
+def extr_rev_data(rev_id, parent_id, time, user, comment, pageTitle):
     # global stat_counter
     # no_statements = 0
     # no_labels = 0
@@ -56,7 +56,7 @@ def extr_rev_data(rev_id, parent_id, time, user, comment, revision):
     dict_item = {}
 
     try:
-        item_id = revision['id']
+        # item_id = revision['id']
 
         # if 'claims' in revision:
         #     no_statements = len(revision['claims'])
@@ -87,7 +87,7 @@ def extr_rev_data(rev_id, parent_id, time, user, comment, revision):
         #     no_aliases = len(revision['aliases'])
 
 
-        dict_item['item_id'] = item_id
+        dict_item['pageTitle'] = pageTitle
         # dict_item['no_statements'] = no_statements
         # dict_item['no_labels'] = no_labels
         dict_item['rev_id'] = rev_id
@@ -122,14 +122,14 @@ def list_cleaner(rev_list):
         rev_list = re.sub(r'<timestamp>|</timestamp>', '', rev_list)
         rev_list = rev_list.lstrip(' ')
 
-    elif '<text xml:space="preserve">' in rev_list:
-        rev_list = rev_list.replace('<text xml:space="preserve">', '')
-        rev_list = rev_list.replace('</text>', '')
-        rev_list = rev_list.replace('\n', '')
-        rev_list = h_parser(rev_list)
-        rev_list = rev_list.decode('utf-8')
-        rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
-        rev_list = rev_list.lstrip(' ')
+    # elif '<text xml:space="preserve">' in rev_list:
+    #     rev_list = rev_list.replace('<text xml:space="preserve">', '')
+    #     rev_list = rev_list.replace('</text>', '')
+    #     rev_list = rev_list.replace('\n', '')
+    #     rev_list = h_parser(rev_list)
+    #     rev_list = rev_list.decode('utf-8')
+    #     rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
+    #     rev_list = rev_list.lstrip(' ')
 
     else:
         rev_list = rev_list.replace('\t', '')
@@ -169,9 +169,6 @@ def file_extractor(file_name):
     except:
         print "I am unable to connect to the database."
 
-
-
-
     with bz2.BZ2File(file_name, 'rb') as inputfile:
         revision_list = []
         revision_processed = []
@@ -180,6 +177,16 @@ def file_extractor(file_name):
         for line in inputfile:
 
             revision_list.append(line)
+
+            if '<title>' in line:
+                pageTitle = line
+                pageTitle = pageTitle.replace('<title>', '')
+                pageTitle = pageTitle.replace('</title>', '')
+                pageTitle = pageTitle.replace('\n', '')
+                pageTitle = pageTitle.lstrip(' ')
+
+            if '<ns>' in line:
+                ns = line
 
             if '</revision>' in line:
                 clean_list = ['<revision>', '<contributor>', '</contributor>', '<model>', '<format>', '<sha1>']
@@ -204,18 +211,18 @@ def file_extractor(file_name):
                     revision_clean[4] = revision_clean[6]
                     del revision_clean[5:7]
 
-                revision_clean = map(list_cleaner, revision_clean)
+                if ns != '<ns>0</ns>':
+                    revision_clean = map(list_cleaner, revision_clean)
+                    try:
+                        # revision_clean[5] = ujson.loads(revision_clean[5])
+                        # revision_save = revision_clean
+                        rev_process = extr_rev_data(revision_clean[0], revision_clean[1], revision_clean[2], revision_clean[3], revision_clean[4], pageTitle)
+                        revision_processed.append(rev_process)
 
-                try:
-                    revision_clean[5] = ujson.loads(revision_clean[5])
-                    # revision_save = revision_clean
-                    rev_process = extr_rev_data(revision_clean[0], revision_clean[1], revision_clean[2], revision_clean[3], revision_clean[4], revision_clean[5])
-                    revision_processed.append(rev_process)
+                    except ValueError as e:
+                        print e, revision_clean
 
-                except ValueError as e:
-                    print e, revision_clean
-
-                counter += 1
+                    counter += 1
                 revision_list = []
 
                 if counter >= 10000:
@@ -224,7 +231,7 @@ def file_extractor(file_name):
 
                     try:
                         cur = conn.cursor()
-                        cur.executemany("""INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(item_id)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""",revision_processed)
+                        cur.executemany("""INSERT INTO revision_pages_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(pageTitle)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""",revision_processed)
                         conn.commit()
                         # print 'imported'
                     except :
@@ -246,7 +253,7 @@ def file_extractor(file_name):
             cur = conn.cursor()
 
             cur.executemany(
-                """INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(item_id)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""", revision_processed)
+                """INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(pageTitle)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""", revision_processed)
             conn.commit()
             # print 'imported'
         except:
