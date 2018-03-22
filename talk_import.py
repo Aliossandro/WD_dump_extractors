@@ -212,6 +212,7 @@ def file_extractor(file_name):
                     del revision_clean[5:7]
 
                 if ns != '<ns>0</ns>':
+                    print 'page found'
                     revision_clean = map(list_cleaner, revision_clean)
                     try:
                         # revision_clean[5] = ujson.loads(revision_clean[5])
@@ -225,7 +226,7 @@ def file_extractor(file_name):
                     counter += 1
                 revision_list = []
 
-                if counter >= 10000:
+                if counter >= 1000:
                     revision_processed = filter(None, revision_processed)
                     # revision_processed_clean = zip(*revision_processed)
 
