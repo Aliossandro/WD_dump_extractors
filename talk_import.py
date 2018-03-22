@@ -211,7 +211,7 @@ def file_extractor(file_name):
                     revision_clean[4] = revision_clean[6]
                     del revision_clean[5:7]
 
-                if ns != '<ns>0</ns>':
+                if '<ns>0</ns>' not in ns:
                     print ns
                     print pageTitle
                     revision_clean = map(list_cleaner, revision_clean)
