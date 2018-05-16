@@ -157,7 +157,6 @@ def file_extractor(file_name):
     #    sha1 = None
     # par_id = None
     item_text = ''
-    global filecount
     # counter = 0
 
     # try:
@@ -217,7 +216,7 @@ def file_extractor(file_name):
                     revision_processed.append(rev_process)
 
                 except ValueError as e:
-                    print e, revision_clean
+                    print(e, revision_clean)
 
 
                 revision_list = []
@@ -277,13 +276,11 @@ def file_extractor(file_name):
 
         revision_processed = []
         counter = 0
-        print file_name + 'exported!'
+        print(file_name + 'exported!')
 
 
 
 def main():
-    global filecount
-    filecount = 1
 
     fin = sys.argv[1]
     file_extractor(fin)
