@@ -7,7 +7,9 @@ Created on Dec 08 2016
 
 # import os
 import sys
-# sys.setdefaultencoding("utf8")
+
+reload(sys)
+sys.setdefaultencoding("utf8")
 
 import re
 # import pandas as pd
@@ -35,6 +37,9 @@ import unicodedata
 def h_parser(line):
     h = HTMLParser.HTMLParser()
     parsed_line = h.unescape(line)
+    parsed_line = parsed_line.replace('<text xml:space="preserve">', '').replace('</text>', '').replace('\n',
+                                                                                                        '').lstrip(' ')
+    parsed_line = unicodedata.normalize('NFKD', parsed_line).encode('utf-8', 'ignore')
 
     return parsed_line
 
@@ -125,13 +130,13 @@ def list_cleaner(rev_list):
         rev_list = rev_list.lstrip(' ')
 
     elif '<text xml:space="preserve">' in rev_list:
-        rev_list = rev_list.replace('<text xml:space="preserve">', '')
-        rev_list = rev_list.replace('</text>', '')
-        rev_list = rev_list.replace('\n', '')
+        # rev_list = rev_list.replace('<text xml:space="preserve">', '')
+        # rev_list = rev_list.replace('</text>', '')
+        # rev_list = rev_list.replace('\n', '')
         rev_list = h_parser(rev_list)
-        rev_list = rev_list.decode('utf-8')
-        rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
-        rev_list = rev_list.lstrip(' ')
+        # rev_list = rev_list.decode('utf-8')
+        # rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
+        # rev_list = rev_list.lstrip(' ')
 
     else:
         rev_list = rev_list.replace('\t', '')
