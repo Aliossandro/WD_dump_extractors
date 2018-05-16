@@ -27,7 +27,7 @@ import unicodedata
 # import csv
 import HTMLParser
 from shutil import copyfileobj
-import ujson
+import json
 import unicodedata
 # import item_examine
 
@@ -62,7 +62,7 @@ def extr_rev_data(rev_id,  time, revision):
     dict_item = {}
 
     try:
-        revision = ujson.loads(revision)
+        revision = json.loads(revision)
         item_id = revision['id']
 
         # if 'claims' in revision:
