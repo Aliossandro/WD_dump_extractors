@@ -206,6 +206,7 @@ def file_extractor(file_name):
                     del revision_clean[5:7]
 
                 revision_clean = map(list_cleaner, revision_clean)
+                revision_clean = list(revision_clean)
 
                 try:
                     revision_clean[5] = ujson.loads(revision_clean[5])
