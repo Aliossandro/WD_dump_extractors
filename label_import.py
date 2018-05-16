@@ -117,7 +117,7 @@ def extr_rev_data(rev_id,  time, revision):
 
 def list_cleaner(rev_list):
     if '<timestamp>' in rev_list:
-        rev_list = rev_list.replace('\t', '')
+        rev_list = str(rev_list).replace('\t', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = rev_list.replace('T', ' ')
         rev_list = rev_list.replace('Z', '')
@@ -125,7 +125,7 @@ def list_cleaner(rev_list):
         rev_list = rev_list.lstrip(' ')
 
     elif '<text xml:space="preserve">' in rev_list:
-        rev_list = rev_list.replace('<text xml:space="preserve">', '')
+        rev_list = str(rev_list).replace('<text xml:space="preserve">', '')
         rev_list = rev_list.replace('</text>', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = h_parser(rev_list)
@@ -134,7 +134,7 @@ def list_cleaner(rev_list):
         rev_list = rev_list.lstrip(' ')
 
     else:
-        rev_list = rev_list.replace('\t', '')
+        rev_list = str(rev_list).replace('\t', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = re.sub(
             r"<id>|</id>|<parentid>|</parentid>|<timestamp>|</timestamp>|<username>|</username>|<ip>|</ip>|<comment>|</comment>",
