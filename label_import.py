@@ -178,16 +178,16 @@ def file_extractor(file_name):
 
 
 
-    with bz2.BZ2File(file_name, 'rb') as inputfile:
+    with bz2.BZ2File(file_name, 'r') as inputfile:
         revision_list = []
         revision_processed = []
         counter = 0
 
         for line in inputfile:
 
-            revision_list.append(str(line))
+            revision_list.append(line)
 
-            if '</revision>' in str(line):
+            if '</revision>' in line:
                 clean_list = ['<revision>', '<contributor>', '</contributor>', '<model>', '<format>', '<sha1>']
                 clean_list_2 = ['</page>', '<page>', '<ns>', '<title>', '<redirect']
 
