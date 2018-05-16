@@ -215,7 +215,7 @@ def file_extractor(file_name):
                 # revision_clean = list(revision_clean)
 
                 try:
-                    revision_clean[5] = ujson.loads(revision_clean[5])
+                    revision_clean[5] = json.loads(revision_clean[5])
                     # revision_save = revision_clean
                     rev_process = extr_rev_data(revision_clean[0],  revision_clean[2], revision_clean[5])
                     revision_processed.append(rev_process)
