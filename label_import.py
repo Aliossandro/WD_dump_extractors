@@ -128,7 +128,7 @@ def list_cleaner(rev_list):
         rev_list = rev_list.replace('</text>', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = h_parser(rev_list)
-        rev_list = rev_list.decode('utf-8')
+        # rev_list = rev_list.decode('utf-8')
         rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
         rev_list = rev_list.lstrip(' ')
 
