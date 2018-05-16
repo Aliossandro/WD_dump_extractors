@@ -7,9 +7,7 @@ Created on Dec 08 2016
 
 # import os
 import sys
-
-
-sys.setdefaultencoding("utf8")
+# sys.setdefaultencoding("utf8")
 
 import re
 # import pandas as pd
