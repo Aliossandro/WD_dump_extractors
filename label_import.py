@@ -26,6 +26,7 @@ import unicodedata
 from html.parser import HTMLParser
 from shutil import copyfileobj
 import ujson
+import unicodedata
 # import item_examine
 
 # file_name = 'wikidatawiki-20161001-pages-meta-history1.xml-p002177658p002421529.bz2'
