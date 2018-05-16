@@ -23,7 +23,7 @@ import pymongo as pm
 # import subprocess
 import unicodedata
 # import csv
-from html.parser import HTMLParser
+import HTMLParser
 from shutil import copyfileobj
 import ujson
 import unicodedata
@@ -33,7 +33,7 @@ import unicodedata
 
 
 def h_parser(line):
-    h = HTMLParser()
+    h = HTMLParser.HTMLParser()
     parsed_line = h.unescape(line)
 
     return parsed_line
@@ -106,18 +106,18 @@ def extr_rev_data(rev_id,  time, revision):
         return dict_item
 
     except KeyError as k:
-        print(k, 'key error')
-        print(revision)
+        print k, 'key error'
+        print revision
     except TypeError as t:
-        print(t, 'type error')
-        print(revision)
+        print t, 'type error'
+        print revision
 
     #
 
 
 def list_cleaner(rev_list):
     if '<timestamp>' in rev_list:
-        rev_list = str(rev_list).replace('\t', '')
+        rev_list = rev_list.replace('\t', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = rev_list.replace('T', ' ')
         rev_list = rev_list.replace('Z', '')
@@ -125,16 +125,16 @@ def list_cleaner(rev_list):
         rev_list = rev_list.lstrip(' ')
 
     elif '<text xml:space="preserve">' in rev_list:
-        rev_list = str(rev_list).replace('<text xml:space="preserve">', '')
+        rev_list = rev_list.replace('<text xml:space="preserve">', '')
         rev_list = rev_list.replace('</text>', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = h_parser(rev_list)
-        # rev_list = rev_list.decode('utf-8')
-        # rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
+        rev_list = rev_list.decode('utf-8')
+        rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
         rev_list = rev_list.lstrip(' ')
 
     else:
-        rev_list = str(rev_list).replace('\t', '')
+        rev_list = rev_list.replace('\t', '')
         rev_list = rev_list.replace('\n', '')
         rev_list = re.sub(
             r"<id>|</id>|<parentid>|</parentid>|<timestamp>|</timestamp>|<username>|</username>|<ip>|</ip>|<comment>|</comment>",
@@ -173,7 +173,7 @@ def file_extractor(file_name):
 
 
 
-    with bz2.BZ2File(file_name, 'r') as inputfile:
+    with bz2.BZ2File(file_name, 'rb') as inputfile:
         revision_list = []
         revision_processed = []
         counter = 0
@@ -207,7 +207,7 @@ def file_extractor(file_name):
                     del revision_clean[5:7]
 
                 revision_clean = map(list_cleaner, revision_clean)
-                revision_clean = list(revision_clean)
+                # revision_clean = list(revision_clean)
 
                 try:
                     revision_clean[5] = ujson.loads(revision_clean[5])
@@ -216,7 +216,7 @@ def file_extractor(file_name):
                     revision_processed.append(rev_process)
 
                 except ValueError as e:
-                    print(e, revision_clean)
+                    print e, revision_clean
 
 
                 revision_list = []
@@ -236,11 +236,11 @@ def file_extractor(file_name):
                         db = conn.wikidb
                         collection = db.labelHistory
                         result = collection.update_many(dd)
-                        print("Data updated with id", result)
+                        print "Data updated with id", result
 
                         # print 'imported'
                     except :
-                        print('Data not updated')
+                        print 'Data not updated'
                         # print 'not imported'
                         # print revision_clean
 
@@ -266,17 +266,17 @@ def file_extractor(file_name):
             db = conn.wikidb
             collection = db.labelHistory
             result = collection.update_many(dd)
-            print("Data updated with id", result)
+            print "Data updated with id", result
 
             # print 'imported'
         except:
-            print('Data not updated')
+            print 'Data not updated'
             # print 'not imported'
             # print revision_clean
 
         revision_processed = []
         counter = 0
-        print(file_name + 'exported!')
+        print file_name + 'exported!'
 
 
 
