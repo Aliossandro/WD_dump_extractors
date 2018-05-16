@@ -16,9 +16,11 @@ import pandas as pd
 import io
 import ujson
 import bz2
+import collections
 import datetime
 import itertools
 import psycopg2
+import pymongo as pm
 # from sqlalchemy import create_engine
 # import subprocess
 import unicodedata
@@ -38,13 +40,13 @@ def h_parser(line):
     return parsed_line
 
 
-def process_buffer(buf):
-    tnode = cet.fromstring(buf)
-    print tnode
+# def process_buffer(buf):
+#     tnode = cet.fromstring(buf)
+#     print tnode
 
 
 
-def extr_rev_data(rev_id, parent_id, time, user, comment, pageTitle):
+def extr_rev_data(rev_id,  time, revision):
     # global stat_counter
     # no_statements = 0
     # no_labels = 0
@@ -56,7 +58,8 @@ def extr_rev_data(rev_id, parent_id, time, user, comment, pageTitle):
     dict_item = {}
 
     try:
-        # item_id = revision['id']
+        revision = ujson.loads(revision)
+        item_id = revision['id']
 
         # if 'claims' in revision:
         #     no_statements = len(revision['claims'])
@@ -87,19 +90,19 @@ def extr_rev_data(rev_id, parent_id, time, user, comment, pageTitle):
         #     no_aliases = len(revision['aliases'])
 
 
-        dict_item['pageTitle'] = pageTitle
+        dict_item[item_id] = {}
         # dict_item['no_statements'] = no_statements
         # dict_item['no_labels'] = no_labels
-        dict_item['rev_id'] = rev_id
-        dict_item['user_name'] = user
-        dict_item['parent_id'] = parent_id
-        dict_item['comment'] = comment
-        dict_item['time_stamp'] = time
+        dict_item[item_id][rev_id] = {}
+
+        dict_item[item_id][rev_id]['time_stamp'] = time
         # dict_item['no_aliases'] = no_aliases
         # dict_item['no_sitelinks'] = no_sitelinks
         # dict_item['no_references'] = no_references
         # dict_item['no_descriptions'] = no_descriptions
         # dict_item['properties_used'] = properties_used
+
+        dict_item[item_id][rev_id]['labels'] = revision['labels']
 
         return dict_item
 
@@ -122,14 +125,14 @@ def list_cleaner(rev_list):
         rev_list = re.sub(r'<timestamp>|</timestamp>', '', rev_list)
         rev_list = rev_list.lstrip(' ')
 
-    # elif '<text xml:space="preserve">' in rev_list:
-    #     rev_list = rev_list.replace('<text xml:space="preserve">', '')
-    #     rev_list = rev_list.replace('</text>', '')
-    #     rev_list = rev_list.replace('\n', '')
-    #     rev_list = h_parser(rev_list)
-    #     rev_list = rev_list.decode('utf-8')
-    #     rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
-    #     rev_list = rev_list.lstrip(' ')
+    elif '<text xml:space="preserve">' in rev_list:
+        rev_list = rev_list.replace('<text xml:space="preserve">', '')
+        rev_list = rev_list.replace('</text>', '')
+        rev_list = rev_list.replace('\n', '')
+        rev_list = h_parser(rev_list)
+        rev_list = rev_list.decode('utf-8')
+        rev_list = unicodedata.normalize('NFKD', unicode(rev_list)).encode('utf-8', 'ignore')
+        rev_list = rev_list.lstrip(' ')
 
     else:
         rev_list = rev_list.replace('\t', '')
@@ -169,6 +172,9 @@ def file_extractor(file_name):
     except:
         print "I am unable to connect to the database."
 
+
+
+
     with bz2.BZ2File(file_name, 'rb') as inputfile:
         revision_list = []
         revision_processed = []
@@ -178,16 +184,6 @@ def file_extractor(file_name):
 
             revision_list.append(line)
 
-            if '<title>' in line:
-                pageTitle = line
-                pageTitle = pageTitle.replace('<title>', '')
-                pageTitle = pageTitle.replace('</title>', '')
-                pageTitle = pageTitle.replace('\n', '')
-                pageTitle = pageTitle.lstrip(' ')
-
-            if '<ns>' in line:
-                ns = line
-
             if '</revision>' in line:
                 clean_list = ['<revision>', '<contributor>', '</contributor>', '<model>', '<format>', '<sha1>']
                 clean_list_2 = ['</page>', '<page>', '<ns>', '<title>', '<redirect']
@@ -195,6 +191,7 @@ def file_extractor(file_name):
                 revision_clean = [revision for revision in revision_list if not any(x in revision for x in clean_list)]
 
                 if '</page>' in revision_clean[0]:
+                    counter += 1
                     # del revision_clean[0:5]
                     revision_clean = [revision for revision in revision_clean if
                                       not any(x in revision for x in clean_list_2)]
@@ -211,32 +208,40 @@ def file_extractor(file_name):
                     revision_clean[4] = revision_clean[6]
                     del revision_clean[5:7]
 
-                if '<ns>0</ns>' not in ns:
+                revision_clean = map(list_cleaner, revision_clean)
 
-                    revision_clean = map(list_cleaner, revision_clean)
-                    try:
-                        # revision_clean[5] = ujson.loads(revision_clean[5])
-                        # revision_save = revision_clean
-                        rev_process = extr_rev_data(revision_clean[0], revision_clean[1], revision_clean[2], revision_clean[3], revision_clean[4], pageTitle)
-                        revision_processed.append(rev_process)
+                try:
+                    revision_clean[5] = ujson.loads(revision_clean[5])
+                    # revision_save = revision_clean
+                    rev_process = extr_rev_data(revision_clean[0],  revision_clean[2], revision_clean[5])
+                    revision_processed.append(rev_process)
 
-                    except ValueError as e:
-                        print e, revision_clean
+                except ValueError as e:
+                    print e, revision_clean
 
-                    counter += 1
+
                 revision_list = []
 
                 if counter >= 1000:
-                    revision_processed = filter(None, revision_processed)
+                    dd = collections.defaultdict(dict)
+
+                    for d in revision_processed:
+                        for k, v in d.items():
+                            dd[k].update(v)
+
+                    # revision_processed = filter(None, revision_processed)
                     # revision_processed_clean = zip(*revision_processed)
 
                     try:
-                        cur = conn.cursor()
-                        cur.executemany("""INSERT INTO revision_pages_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(pageTitle)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""",revision_processed)
-                        conn.commit()
+                        conn = pm.MongoClient()
+                        db = conn.wikidb
+                        collection = db.labelHistory
+                        result = collection.update_many(dd)
+                        print("Data updated with id", result)
+
                         # print 'imported'
                     except :
-                        conn.rollback()
+                        print('Data not updated')
                         # print 'not imported'
                         # print revision_clean
 
@@ -248,17 +253,25 @@ def file_extractor(file_name):
                 continue
 
         ### after last line
-        revision_processed = filter(None, revision_processed)
+        # revision_processed = filter(None, revision_processed)
+
+        for d in revision_processed:
+            for k, v in d.items():
+                dd[k].update(v)
+
+        # revision_processed = filter(None, revision_processed)
+        # revision_processed_clean = zip(*revision_processed)
 
         try:
-            cur = conn.cursor()
+            conn = pm.MongoClient()
+            db = conn.wikidb
+            collection = db.labelHistory
+            result = collection.update_many(dd)
+            print("Data updated with id", result)
 
-            cur.executemany(
-                """INSERT INTO revision_history_201710 (comment_rev, item_id, parent_id, rev_id, time_stamp, user_name) VALUES (%(comment)s, %(pageTitle)s, %(parent_id)s, %(rev_id)s, %(time_stamp)s, %(user_name)s);""", revision_processed)
-            conn.commit()
             # print 'imported'
         except:
-            conn.rollback()
+            print('Data not updated')
             # print 'not imported'
             # print revision_clean
 
