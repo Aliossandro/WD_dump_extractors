@@ -12,14 +12,14 @@ reload(sys)
 sys.setdefaultencoding("utf8")
 
 import re
-import pandas as pd
-import io
-import ujson
+# import pandas as pd
+# import io
+# import ujson
 import bz2
 import collections
-import datetime
-import itertools
-import psycopg2
+# import datetime
+# import itertools
+# import psycopg2
 import pymongo as pm
 # from sqlalchemy import create_engine
 # import subprocess
@@ -107,11 +107,11 @@ def extr_rev_data(rev_id,  time, revision):
         return dict_item
 
     except KeyError as k:
-        print k, 'key error'
-        print revision
+        print(k, 'key error')
+        print(revision)
     except TypeError as t:
-        print t, 'type error'
-        print revision
+        print(t, 'type error')
+        print(revision)
 
     #
 
@@ -160,17 +160,17 @@ def file_extractor(file_name):
     global filecount
     # counter = 0
 
-    try:
-        params = {
-            'database': 'wikidb',
-            'user': 'postgres',
-            'password': 'postSonny175',
-            'host': 'localhost',
-            'port': '5432'
-        }
-        conn = psycopg2.connect(**params)
-    except:
-        print "I am unable to connect to the database."
+    # try:
+    #     params = {
+    #         'database': 'wikidb',
+    #         'user': 'postgres',
+    #         'password': 'postSonny175',
+    #         'host': 'localhost',
+    #         'port': '5432'
+    #     }
+    #     conn = psycopg2.connect(**params)
+    # except:
+    #     print "I am unable to connect to the database."
 
 
 
