@@ -23,7 +23,7 @@ import pymongo as pm
 # import subprocess
 import unicodedata
 # import csv
-import HTMLParser
+from html.parser import HTMLParser
 from shutil import copyfileobj
 import ujson
 # import item_examine
@@ -32,7 +32,7 @@ import ujson
 
 
 def h_parser(line):
-    h = HTMLParser.HTMLParser()
+    h = HTMLParser()
     parsed_line = h.unescape(line)
 
     return parsed_line
