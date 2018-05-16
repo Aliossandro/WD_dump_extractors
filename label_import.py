@@ -5,10 +5,10 @@ Created on Dec 08 2016
 @author: Alessandro
 """
 
-import os
+# import os
 import sys
 
-reload(sys)
+
 sys.setdefaultencoding("utf8")
 
 import re
