@@ -233,8 +233,11 @@ def file_extractor(file_name):
                     dd = collections.defaultdict(dict)
 
                     for d in revision_processed:
-                        for k, v in d.items():
-                            dd[k].update(v)
+                        try:
+                            for k, v in d.items():
+                                dd[k].update(v)
+                        except AttributeError:
+                            print('empty dict')
 
                     # revision_processed = filter(None, revision_processed)
                     # revision_processed_clean = zip(*revision_processed)
