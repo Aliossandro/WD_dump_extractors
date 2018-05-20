@@ -94,19 +94,21 @@ def extr_rev_data(rev_id,  time, revision):
         #     no_aliases = len(revision['aliases'])
 
 
-        dict_item[item_id] = {}
+        dict_item['item_id'] = item_id
         # dict_item['no_statements'] = no_statements
         # dict_item['no_labels'] = no_labels
-        dict_item[item_id][rev_id] = {}
+        dict_item['rev_id'] = rev_id
 
-        dict_item[item_id][rev_id]['time_stamp'] = time
+        dict_item['time_stamp'] = time
         # dict_item['no_aliases'] = no_aliases
         # dict_item['no_sitelinks'] = no_sitelinks
         # dict_item['no_references'] = no_references
         # dict_item['no_descriptions'] = no_descriptions
         # dict_item['properties_used'] = properties_used
 
-        dict_item[item_id][rev_id]['labels'] = revision['labels']
+        dict_item['labels'] = revision['labels'].keys()
+        dict_item['descriptions'] = revision['descriptions'].keys()
+        dict_item['aliases'] = revision['aliases'].keys()
 
         return dict_item
 
@@ -230,30 +232,31 @@ def file_extractor(file_name):
                 revision_list = []
 
                 if counter >= 1000:
-                    dd = collections.defaultdict(dict)
-
-                    for d in revision_processed:
-                        try:
-                            for k, v in d.items():
-                                dd[k].update(v)
-                        except AttributeError:
-                            print('empty dict')
+                    # dd = collections.defaultdict(dict)
+                    #
+                    # for d in revision_processed:
+                    #     try:
+                    #         for k, v in d.items():
+                    #             dd[k].update(v)
+                    #     except AttributeError:
+                    #         print('empty dict')
 
                     # revision_processed = filter(None, revision_processed)
                     # revision_processed_clean = zip(*revision_processed)
+                    if len(revision_processed) > 0:
 
-                    try:
-                        conn = pm.MongoClient()
-                        db = conn.wikidb
-                        collection = db.labelHistory
-                        result = collection.update_many(dd)
-                        print "Data updated with id", result
+                        try:
+                            conn = pm.MongoClient()
+                            db = conn.wikidb
+                            collection = db.labelHistory
+                            result = collection.insert_many(revision_processed)
+                            print "Data updated with id", result
 
-                        # print 'imported'
-                    except :
-                        print 'Data not updated'
-                        # print 'not imported'
-                        # print revision_clean
+                            # print 'imported'
+                        except :
+                            print 'Data not updated'
+                            # print 'not imported'
+                            # print revision_clean
 
                     revision_processed = []
                     counter = 0
@@ -264,26 +267,29 @@ def file_extractor(file_name):
 
         ### after last line
         # revision_processed = filter(None, revision_processed)
-
-        for d in revision_processed:
-            for k, v in d.items():
-                dd[k].update(v)
+        # dd = collections.defaultdict(dict)
+        # for d in revision_processed:
+        #     try:
+        #         for k, v in d.items():
+        #             dd[k].update(v)
+        #     except AttributeError:
+        #         print('empty dict')
 
         # revision_processed = filter(None, revision_processed)
         # revision_processed_clean = zip(*revision_processed)
+        if len(revision_processed) > 0:
+            try:
+                conn = pm.MongoClient()
+                db = conn.wikidb
+                collection = db.labelHistory
+                collection.update_many(revision_processed)
+                print "Data updated with id", result
 
-        try:
-            conn = pm.MongoClient()
-            db = conn.wikidb
-            collection = db.labelHistory
-            result = collection.update_many(dd)
-            print "Data updated with id", result
-
-            # print 'imported'
-        except:
-            print 'Data not updated'
-            # print 'not imported'
-            # print revision_clean
+                # print 'imported'
+            except:
+                print 'Data not updated'
+                # print 'not imported'
+                # print revision_clean
 
         revision_processed = []
         counter = 0
