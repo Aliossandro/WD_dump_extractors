@@ -105,10 +105,20 @@ def extr_rev_data(rev_id,  time, revision):
         # dict_item['no_references'] = no_references
         # dict_item['no_descriptions'] = no_descriptions
         # dict_item['properties_used'] = properties_used
+        try:
+            dict_item['labels'] = revision['labels'].keys()
+        except AttributeError:
+            print(revision['labels'])
 
-        dict_item['labels'] = revision['labels'].keys()
-        dict_item['descriptions'] = revision['descriptions'].keys()
-        dict_item['aliases'] = revision['aliases'].keys()
+        try:
+            dict_item['descriptions'] = revision['descriptions'].keys()
+        except AttributeError:
+            print(revision['descriptions'])
+
+        try:
+            dict_item['aliases'] = revision['aliases'].keys()
+        except AttributeError:
+            print(revision['aliases'])
 
         return dict_item
 
