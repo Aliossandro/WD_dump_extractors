@@ -108,16 +108,19 @@ def extr_rev_data(rev_id,  time, revision):
         try:
             dict_item['labels'] = revision['labels'].keys()
         except AttributeError:
+            dict_item['labels'] = []
             print(revision['labels'])
 
         try:
             dict_item['descriptions'] = revision['descriptions'].keys()
         except AttributeError:
+            dict_item['descriptions'] = []
             print(revision['descriptions'])
 
         try:
             dict_item['aliases'] = revision['aliases'].keys()
         except AttributeError:
+            dict_item['aliases'] = []
             print(revision['aliases'])
 
         return dict_item
