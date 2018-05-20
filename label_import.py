@@ -109,19 +109,16 @@ def extr_rev_data(rev_id,  time, revision):
             dict_item['labels'] = revision['labels'].keys()
         except AttributeError:
             dict_item['labels'] = []
-            print(revision['labels'])
 
         try:
             dict_item['descriptions'] = revision['descriptions'].keys()
         except AttributeError:
             dict_item['descriptions'] = []
-            print(revision['descriptions'])
 
         try:
             dict_item['aliases'] = revision['aliases'].keys()
         except AttributeError:
             dict_item['aliases'] = []
-            print(revision['aliases'])
 
         return dict_item
 
@@ -262,8 +259,8 @@ def file_extractor(file_name):
                             conn = pm.MongoClient()
                             db = conn.wikidb
                             collection = db.labelHistory
-                            result = collection.insert_many(revision_processed)
-                            print "Data updated with id", result
+                            collection.insert_many(revision_processed)
+                            print "Data updated with id"
 
                             # print 'imported'
                         except :
@@ -296,7 +293,7 @@ def file_extractor(file_name):
                 db = conn.wikidb
                 collection = db.labelHistory
                 collection.update_many(revision_processed)
-                print "Data updated with id", result
+                print "Data updated with id"
 
                 # print 'imported'
             except:
